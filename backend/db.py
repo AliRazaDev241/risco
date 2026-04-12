@@ -1,9 +1,13 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, declarative_base
 from dotenv import load_dotenv
 from pathlib import Path
 import os
-import logs
+
+# Setup for logger
+import logging
+from logger import get_logger
+logger = get_logger(__name__)
 
 # Loads env file from Project Folder
 load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env")
@@ -12,7 +16,15 @@ load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env")
 DATABASE_URL = f"oracle+oracledb://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/?service_name={os.getenv('DB_NAME')}"
 
 # Connection to the database
-engine = create_engine(DATABASE_URL)
+try:
+    engine = create_engine(DATABASE_URL)
+    with engine.connect() as conn:
+        conn.execute(text("SELECT 1 FROM DUAL"))
+    logger.info("Database connection established successfully")
+except Exception as e:
+    logger.critical(f"Database connection failed: {e}")
+    raise
+
 # Sessions created with the database for each request to use
 SessionLocal = sessionmaker(bind=engine)
 
@@ -24,15 +36,12 @@ def get_db():
     db = SessionLocal()
     try:
         yield db
+        logger.debug("Database session opened")
+    except Exception as e:
+        logger.error(f"Database session error: {e}")
+        db.rollback()
+        raise
     finally:
         db.close()
+        logger.debug("Database session closed")
 
-
-# remove comments to test connection with database
-"""
-try:
-    with engine.connect() as conn:
-        print("Connected to Oracle successfully!")
-except Exception as e:
-    print(f"Connection failed: {e}")
-"""
