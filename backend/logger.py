@@ -1,3 +1,5 @@
+"""Logging configuration for the RISCO application."""
+
 import logging
 from pathlib import Path
 
@@ -17,12 +19,10 @@ stream_handler = logging.StreamHandler()
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[
-        db_handler,
-        error_handler,
-        stream_handler
-    ]
+    handlers=[db_handler, error_handler, stream_handler],
 )
 
+
 def get_logger(name: str):
+    """Sets up and returns the application logger."""
     return logging.getLogger(name)

@@ -1,4 +1,4 @@
-# RISCO DBMS
+# RISCO DBMS (Outdated Read Me)
 
 A CLI-based financial management system for organizations to track revenue, expenses, clients, and risk alerts. Built with Python and PostgreSQL, designed to be upgraded to a FastAPI + Flutter full-stack application.
 
