@@ -15,7 +15,7 @@ from db import Base
 class Users(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     email = Column(String(100), unique=True, nullable=False)
     password_hash = Column(String(255), nullable=True)
     first_name = Column(String(50), nullable=False)
@@ -30,7 +30,7 @@ class Users(Base):
 class Organization(Base):
     __tablename__ = "organizations"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     org_name = Column(String(100), nullable=False, unique=True)
 
     def __repr__(self):
@@ -40,7 +40,7 @@ class Organization(Base):
 class Roles(Base):
     __tablename__ = "roles"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     role_name = Column(String(50), unique=True, nullable=False)
     permission_level = Column(Integer, nullable=False)
 
@@ -64,7 +64,7 @@ class OrganizationMembers(Base):
 class Clients(Base):
     __tablename__ = "clients"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=False)
     name = Column(String(100), nullable=False)
     email = Column(String(100), unique=True, nullable=False)
@@ -82,7 +82,7 @@ class Clients(Base):
 class Revenue(Base):
     __tablename__ = "revenue"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     client_id = Column(Integer, ForeignKey("clients.id"), nullable=False)
     revenue_type = Column(String(20), nullable=False)
     date_expected = Column(DateTime, nullable=False)
@@ -93,7 +93,7 @@ class Revenue(Base):
         CheckConstraint(
             "revenue_type IN ('One_Time', 'Recurring')", name="chk_revenue_type"
         ),
-        CheckConstraint("amount > 0", name="chk_amount"),
+        CheckConstraint("amount > 0", name="chk_revenue_amount"),
     )
 
     def __repr__(self):
@@ -103,7 +103,7 @@ class Revenue(Base):
 class Expenses(Base):
     __tablename__ = "expenses"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=False)
     urgency = Column(String(20), nullable=False)
     expense_type = Column(String(20), nullable=False)
@@ -117,7 +117,7 @@ class Expenses(Base):
         CheckConstraint(
             "urgency IN ('Critical', 'Non-Critical')", name="chk_urgency"
         ),
-        CheckConstraint("amount > 0", name="chk_amount"),
+        CheckConstraint("amount > 0", name="chk_expense_amount"),
     )
 
     def __repr__(self):
@@ -127,7 +127,7 @@ class Expenses(Base):
 class RiskAlerts(Base):
     __tablename__ = "risk_alerts"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     expense_id = Column(Integer, ForeignKey("expenses.id"), nullable=True)
     revenue_id = Column(Integer, ForeignKey("revenue.id"), nullable=True)
     urgency_level = Column(Integer, nullable=False)
@@ -146,13 +146,13 @@ class RiskAlerts(Base):
     )
 
     def __repr__(self):
-        return f"<Organization {self.urgency_level} {self.status} {self.description}>"
+        return f"<RiskAlert {self.urgency_level} {self.status} {self.description}>"
 
 
-class FinancialSnapshots(Base):
+class FinancialSnapshots(Base): 
     __tablename__ = "financial_snapshots"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=False)
     snapshot_date = Column(DateTime, server_default=func.now(), nullable=False)
     cash_balance = Column(Integer, default=0, nullable=False)
