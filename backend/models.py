@@ -78,7 +78,6 @@ class Clients(Base):
     def __repr__(self):
         return f"<Client {self.name}>"
 
-
 class Revenue(Base):
     __tablename__ = "revenue"
 
