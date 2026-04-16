@@ -15,6 +15,10 @@ from routers import (
 
 app = FastAPI(title="RISCO")
 
+@app.get("/")
+def root():
+    return {"message": "RISCO API is running"}
+
 app.include_router(users.router)
 app.include_router(clients.router)
 app.include_router(organizations.router)
