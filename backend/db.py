@@ -1,4 +1,4 @@
-""" " Setup for database connection that other modules use"""
+""" Setup for database connection that other modules use"""
 
 from pathlib import Path
 import os
@@ -35,7 +35,6 @@ try:
     logger.info("Database connection established successfully")
 except Exception as e:
     logger.critical("Database connection failed: %s", e)
-    raise
 
 # Sessions created with the database for each request to use
 SESSION_LOCAL = sessionmaker(bind=engine)
