@@ -1,4 +1,4 @@
-""" Setup for database connection that other modules use"""
+"""Setup for database connection that other modules use"""
 
 from pathlib import Path
 import os

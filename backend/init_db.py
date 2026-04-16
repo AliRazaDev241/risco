@@ -1,4 +1,4 @@
-""" Initializes Database Tables """
+"""Initializes Database Tables"""
 
 from db import Base, engine
 import models

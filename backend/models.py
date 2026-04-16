@@ -1,4 +1,4 @@
-""" ORM Models - each class maps to a database table in the schema via SQL Alchemy"""
+"""ORM Models - each class maps to a database table in the schema via SQL Alchemy"""
 
 from sqlalchemy import (
     Column,
@@ -72,11 +72,14 @@ class Clients(Base):
     reliability_score = Column(Integer, nullable=False)
 
     __table_args__ = (
-        CheckConstraint("reliability_score BETWEEN 1 AND 100", name="chk_reliability_score"),
-        )
+        CheckConstraint(
+            "reliability_score BETWEEN 1 AND 100", name="chk_reliability_score"
+        ),
+    )
 
     def __repr__(self):
         return f"<Client {self.name}>"
+
 
 class Revenue(Base):
     __tablename__ = "revenue"
@@ -113,9 +116,7 @@ class Expenses(Base):
         CheckConstraint(
             "expense_type IN ('One_Time', 'Recurring')", name="chk_expense_type"
         ),
-        CheckConstraint(
-            "urgency IN ('Critical', 'Non-Critical')", name="chk_urgency"
-        ),
+        CheckConstraint("urgency IN ('Critical', 'Non-Critical')", name="chk_urgency"),
         CheckConstraint("amount > 0", name="chk_expense_amount"),
     )
 
@@ -141,7 +142,7 @@ class RiskAlerts(Base):
         CheckConstraint("status IN ('Open', 'Resolved', 'Ignored')", name="chk_status"),
         CheckConstraint(
             "(expense_id IS NULL AND revenue_id IS NOT NULL) OR (expense_id IS NOT NULL AND revenue_id IS NULL)",
-            name="chk_one_source"
+            name="chk_one_source",
         ),
     )
 
@@ -149,7 +150,7 @@ class RiskAlerts(Base):
         return f"<RiskAlert {self.urgency_level} {self.status} {self.description}>"
 
 
-class FinancialSnapshots(Base): 
+class FinancialSnapshots(Base):
     __tablename__ = "financial_snapshots"
 
     id = Column(Integer, primary_key=True)
@@ -161,7 +162,9 @@ class FinancialSnapshots(Base):
     monthly_expense = Column(Integer, nullable=False)
 
     __table_args__ = (
-        CheckConstraint("snapshot_type IN ('Base', 'Best', 'Worst')", name="chk_snapshot_type"),
+        CheckConstraint(
+            "snapshot_type IN ('Base', 'Best', 'Worst')", name="chk_snapshot_type"
+        ),
         CheckConstraint("monthly_revenue >= 0", name="chk_monthly_revenue"),
         CheckConstraint("monthly_expense >= 0", name="chk_monthly_expenses"),
     )

@@ -1,7 +1,17 @@
-""" Initialized FastAPI app and includes all routers"""
+"""Initialized FastAPI app and includes all routers"""
 
 from fastapi import FastAPI
-from routers import users, clients, organizations, roles, organization_members, revenue, expenses, risk_alerts, financial_snapshots
+from routers import (
+    users,
+    clients,
+    organizations,
+    roles,
+    organization_members,
+    revenue,
+    expenses,
+    risk_alerts,
+    financial_snapshots,
+)
 
 app = FastAPI(title="RISCO DBMS")
 
