@@ -13,7 +13,7 @@ from routers import (
     financial_snapshots,
 )
 
-app = FastAPI(title="RISCO DBMS")
+app = FastAPI(title="RISCO")
 
 app.include_router(users.router)
 app.include_router(clients.router)
