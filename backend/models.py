@@ -141,7 +141,8 @@ class RiskAlerts(Base):
         CheckConstraint("urgency_level BETWEEN 1 AND 3", name="chk_urgency_level"),
         CheckConstraint("status IN ('Open', 'Resolved', 'Ignored')", name="chk_status"),
         CheckConstraint(
-            "(expense_id IS NULL) <> (revenue_id IS NULL)", name="chk_one_source"
+            "(expense_id IS NULL AND revenue_id IS NOT NULL) OR (expense_id IS NOT NULL AND revenue_id IS NULL)",
+            name="chk_one_source"
         ),
     )
 
