@@ -10,13 +10,6 @@ logger = get_logger(__name__)
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
-@router.get("/{user_id}", response_model=schema.UserResponse)
-def get_user(user_id: int, db: Session = Depends(get_db)):
-    user = user_service.get_user_by_id(user_id, db)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
-
 @router.post("/", response_model=schema.UserResponse)
 def register(user: schema.UserCreate, db: Session = Depends(get_db)):
     existing = user_service.get_user_by_email(user.email, db)
@@ -30,11 +23,4 @@ def login(credentials: schema.UserLogin, db: Session = Depends(get_db)):
     user = user_service.authenticate_user(credentials.email, credentials.password, db)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid email or password")
-    return user
-
-@router.put("/{user_id}", response_model=schema.UserResponse)
-def update_user(user_id: int, updates: schema.UserUpdate, db: Session = Depends(get_db)):
-    user = user_service.update_user(user_id, updates, db)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
     return user
