@@ -1,11 +1,11 @@
 """ Pydantic schemas for API request and response validation """
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
  
 class UserCreate(BaseModel):
     """ Validates input before insertion into Users Table """
     email: str
-    password_hash: str
+    password: str
     first_name: str
     last_name: str
 
@@ -23,8 +23,7 @@ class UserResponse(BaseModel):
     last_name: str
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class OrganizationCreate(BaseModel):
     """ Validates input before insertion into Organization Table """
@@ -39,8 +38,7 @@ class OrganizationResponse(BaseModel):
     id: int
     org_name: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class RoleCreate(BaseModel):
     """ Validates input before insertion into Roles Table """
@@ -58,9 +56,7 @@ class RoleResponse(BaseModel):
     role_name: str
     permission_level: int
 
-    class Config:
-        from_attributes = True
-
+    model_config = ConfigDict(from_attributes=True)
 class OrgMemberCreate(BaseModel):
     """ Validates input before insertion into orgMember Table """
     member_id: int
@@ -75,9 +71,7 @@ class OrgMemberResponse(BaseModel):
     role_id: int
     added_by: int
 
-    class Config:
-        from_attributes = True
-
+    model_config = ConfigDict(from_attributes=True)
 
 class ClientsCreate(BaseModel):
     """ Validate input before insertion into clients table """
@@ -104,8 +98,7 @@ class ClientsResponse(BaseModel):
     contact_number: str | None
     reliability_score: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
     
 
 class RevenueCreate(BaseModel):
@@ -129,8 +122,7 @@ class RevenueResponse(BaseModel):
     date_received: datetime | None
     amount: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ExpenseCreate(BaseModel):
@@ -157,8 +149,7 @@ class ExpenseResponse(BaseModel):
     date: datetime
     amount: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class RiskAlertUpdate(BaseModel):
@@ -178,8 +169,7 @@ class RiskAlertResponse(BaseModel):
     created_at: datetime
     resolved_at: datetime | None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class SnapshotCreate(BaseModel):
@@ -197,5 +187,4 @@ class SnapshotResponse(BaseModel):
     monthly_revenue: int
     monthly_expense: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
