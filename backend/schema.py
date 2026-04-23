@@ -1,19 +1,24 @@
 """ Pydantic schemas for API request and response validation """
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from datetime import datetime
  
 class UserCreate(BaseModel):
     """ Validates input before insertion into Users Table """
     email: str
-    password: str
+    password: str = Field(min_length=8)
     first_name: str
     last_name: str
+
+class UserLogin(BaseModel):
+    """ Validates login credentials """
+    email: str
+    password: str
 
 class UserUpdate(BaseModel):
     """ Validates input before Updating Users Table """
     first_name: str | None = None
     last_name: str | None = None
-    password_hash: str | None = None
+    password: str | None = None
 
 class UserResponse(BaseModel):
     """ Reads data from Users Table """

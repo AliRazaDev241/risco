@@ -3,14 +3,6 @@
 from fastapi import FastAPI
 from routers import (
     users,
-    clients,
-    organizations,
-    roles,
-    organization_members,
-    revenue,
-    expenses,
-    risk_alerts,
-    financial_snapshots,
 )
 
 app = FastAPI(title="RISCO")
