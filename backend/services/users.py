@@ -46,6 +46,7 @@ def create_user(user: schema.UserCreate, db: Session):
         raise
 
 def authenticate_user(email: str, password: str, db: Session):
+    " Validates user identity "
     user = get_user_by_email(email, db)
     if not user:
         logger.warning("Login failed - email not found: %s", email)
@@ -57,6 +58,7 @@ def authenticate_user(email: str, password: str, db: Session):
     return user
 
 def update_user(user_id: int, updates: schema.UserUpdate, db: Session):
+    " Update user credentials "
     try:
         user = get_user_by_id(user_id, db)
         if not user:
