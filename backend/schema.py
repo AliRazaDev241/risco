@@ -14,12 +14,6 @@ class UserLogin(BaseModel):
     email: str
     password: str
 
-class UserUpdate(BaseModel):
-    """ Validates input before Updating Users Table """
-    first_name: str | None = None
-    last_name: str | None = None
-    password: str | None = None
-
 class UserResponse(BaseModel):
     """ Reads data from Users Table """
     id: int
@@ -34,9 +28,10 @@ class OrganizationCreate(BaseModel):
     """ Validates input before insertion into Organization Table """
     org_name: str
 
-class OrganizationUpdate(BaseModel):
+class OrganizationJoinRequest(BaseModel):
     """ Validates input before Updating Organization Table """
-    org_name: str | None = None
+    user_id: int
+    org_name: str
 
 class OrganizationResponse(BaseModel):
     """ Read data from Organization Table """

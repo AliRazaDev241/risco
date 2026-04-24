@@ -56,23 +56,3 @@ def authenticate_user(email: str, password: str, db: Session):
         return None
     logger.info("User authenticated: %s", email)
     return user
-
-def update_user(user_id: int, updates: schema.UserUpdate, db: Session):
-    " Update user credentials "
-    try:
-        user = get_user_by_id(user_id, db)
-        if not user:
-            return None
-        data = updates.model_dump(exclude_none=True)
-        if "password" in data:
-            data["password_hash"] = hash_password(data.pop("password"))
-        for field, value in data.items():
-            setattr(user, field, value)
-        db.commit()
-        db.refresh(user)
-        logger.info("User updated: %s", user_id)
-        return user
-    except Exception as e:
-        db.rollback()
-        logger.error("Failed to update user %s: %s", user_id, e)
-        raise

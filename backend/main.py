@@ -3,6 +3,7 @@
 from fastapi import FastAPI
 from routers import (
     users,
+    organizations,
 )
 
 app = FastAPI(title="RISCO")
@@ -12,9 +13,10 @@ def root():
     return {"message": "RISCO API is running"}
 
 app.include_router(users.router)
+app.include_router(organizations.router)
 """
 app.include_router(clients.router)
-app.include_router(organizations.router)
+
 app.include_router(roles.router)
 app.include_router(organization_members.router)
 app.include_router(revenue.router)
