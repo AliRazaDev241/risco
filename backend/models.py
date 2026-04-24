@@ -1,5 +1,7 @@
 """ORM Models - each class maps to a database table in the schema via SQL Alchemy"""
 
+from sqlalchemy import text
+
 from sqlalchemy import (
     Column,
     Integer,
@@ -15,7 +17,7 @@ from db import Base
 class Users(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True, server_default=text("users_seq.NEXTVAL"))
     email = Column(String(100), unique=True, nullable=False)
     password_hash = Column(String(255), nullable=True)
     first_name = Column(String(50), nullable=False)

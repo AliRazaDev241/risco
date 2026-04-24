@@ -1,10 +1,10 @@
-// import Login from "./pages/login";
+import Login from "./pages/login";
 
-// function App() {
-//   return <Login />;
-// }
+function App() {
+  return <Login />;
+}
 
-// export default App;
+export default App;
 
 // import Dashboard from "./pages/Dashboard";
 
@@ -14,10 +14,10 @@
 
 // export default App;
 
-import OrgSelect  from "./pages/OrgSelect";
+// import OrgSelect  from "./pages/OrgSelect";
 
-function App() {
-  return <OrgSelect />;
-}
+// function App() {
+//   return <OrgSelect />;
+// }
 
-export default App;
+// export default App;
