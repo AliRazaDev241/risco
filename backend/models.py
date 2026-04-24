@@ -1,7 +1,6 @@
 """ORM Models - each class maps to a database table in the schema via SQL Alchemy"""
 
-from sqlalchemy import text
-
+from sqlalchemy import Identity
 from sqlalchemy import (
     Column,
     Integer,
@@ -17,7 +16,7 @@ from db import Base
 class Users(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, autoincrement=True, server_default=text("users_seq.NEXTVAL"))
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     email = Column(String(100), unique=True, nullable=False)
     password_hash = Column(String(255), nullable=True)
     first_name = Column(String(50), nullable=False)
@@ -32,7 +31,7 @@ class Users(Base):
 class Organization(Base):
     __tablename__ = "organizations"
 
-    id = Column(Integer, primary_key=True, autoincrement=True, server_default=text("organizatione_seq.NEXTVAL"))
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     org_name = Column(String(100), nullable=False, unique=True)
     def __repr__(self):
         return f"<Organization {self.org_name}>"
@@ -41,7 +40,7 @@ class Organization(Base):
 class Roles(Base):
     __tablename__ = "roles"
 
-    id = Column(Integer, primary_key=True, autoincrement=True, server_default=text("roles_seq.NEXTVAL"))
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     role_name = Column(String(50), unique=True, nullable=False)
     permission_level = Column(Integer, nullable=False)
 
@@ -65,7 +64,7 @@ class OrganizationMembers(Base):
 class Clients(Base):
     __tablename__ = "clients"
 
-    id = Column(Integer, primary_key=True, autoincrement=True, server_default=text("clients_seq.NEXTVAL"))
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=False)
     name = Column(String(100), nullable=False)
     email = Column(String(100), unique=True, nullable=False)
@@ -85,7 +84,7 @@ class Clients(Base):
 class Revenue(Base):
     __tablename__ = "revenue"
 
-    id = Column(Integer, primary_key=True, autoincrement=True, server_default=text("revenue_seq.NEXTVAL"))
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     client_id = Column(Integer, ForeignKey("clients.id"), nullable=False)
     revenue_type = Column(String(20), nullable=False)
     date_expected = Column(DateTime, nullable=False)
@@ -106,7 +105,7 @@ class Revenue(Base):
 class Expenses(Base):
     __tablename__ = "expenses"
 
-    id = Column(Integer, primary_key=True, autoincrement=True, server_default=text("expenses_seq.NEXTVAL"))
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=False)
     urgency = Column(String(20), nullable=False)
     expense_type = Column(String(20), nullable=False)
@@ -127,7 +126,7 @@ class Expenses(Base):
 class RiskAlerts(Base):
     __tablename__ = "risk_alerts"
 
-    id = Column(Integer, primary_key=True, autoincrement=True, server_default=text("risk_alerts_seq.NEXTVAL"))
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     expense_id = Column(Integer, ForeignKey("expenses.id"), nullable=True)
     revenue_id = Column(Integer, ForeignKey("revenue.id"), nullable=True)
     urgency_level = Column(Integer, nullable=False)
@@ -153,7 +152,7 @@ class RiskAlerts(Base):
 class FinancialSnapshots(Base):
     __tablename__ = "financial_snapshots"
 
-    id = Column(Integer, primary_key=True, autoincrement=True, server_default=text("financial_snapshots_seq.NEXTVAL"))
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=False)
     snapshot_date = Column(DateTime, server_default=func.now(), nullable=False)
     cash_balance = Column(Integer, default=0, nullable=False)
