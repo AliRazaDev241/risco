@@ -65,7 +65,7 @@ class OrgMemberCreate(BaseModel):
     added_by: int
 
 class OrgMemberResponse(BaseModel):
-    """ Reads data from orgMember Table """
+    """ Reads data from orgMember  Table """
     member_id: int
     organization_id: int
     role_id: int
