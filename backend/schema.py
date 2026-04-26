@@ -40,15 +40,20 @@ class OrganizationResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
+class AddMemberRequest(BaseModel):
+    member_id: int
+    role_id: int
+    added_by: int
+
+
+class UpdateRoleRequest(BaseModel):
+    role_id: int
+
 class RoleCreate(BaseModel):
     """ Validates input before insertion into Roles Table """
     role_name: str
     permission_level: int
-
-class RoleUpdate(BaseModel):
-    """ Validates input before Updating Roles Table """
-    role_name: str | None = None
-    permission_level: int | None = None
 
 class RoleResponse(BaseModel):
     """ Reads data from Roles Table """
@@ -57,12 +62,6 @@ class RoleResponse(BaseModel):
     permission_level: int
 
     model_config = ConfigDict(from_attributes=True)
-class OrgMemberCreate(BaseModel):
-    """ Validates input before insertion into orgMember Table """
-    member_id: int
-    organization_id: int
-    role_id: int
-    added_by: int
 
 class OrgMemberResponse(BaseModel):
     """ Reads data from orgMember  Table """
