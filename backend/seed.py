@@ -1,9 +1,11 @@
-""" Intiliazed db tables with roles"""
+"""Intiliazed db tables with roles"""
+
 from db import SESSION_LOCAL
 from models import Roles
 from logger import get_logger
 
 logger = get_logger(__name__)
+
 
 def seed_roles():
     db = SESSION_LOCAL()
@@ -35,6 +37,7 @@ def seed_roles():
     finally:
         db.close()
         logger.debug("Database session closed")
+
 
 if __name__ == "__main__":
     seed_roles()

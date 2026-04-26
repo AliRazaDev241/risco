@@ -33,6 +33,7 @@ class Organization(Base):
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     org_name = Column(String(100), nullable=False, unique=True)
+
     def __repr__(self):
         return f"<Organization {self.org_name}>"
 
@@ -122,6 +123,7 @@ class Expenses(Base):
 
     def __repr__(self):
         return f"<Expense {self.amount}>"
+
 
 class RiskAlerts(Base):
     __tablename__ = "risk_alerts"

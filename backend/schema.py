@@ -1,21 +1,29 @@
-""" Pydantic schemas for API request and response validation """
+"""Pydantic schemas for API request and response validation"""
+
+from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 from datetime import datetime
- 
+
+
 class UserCreate(BaseModel):
-    """ Validates input before insertion into Users Table """
+    """Validates input before insertion into Users Table"""
+
     email: str
     password: str = Field(min_length=8)
     first_name: str
     last_name: str
 
+
 class UserLogin(BaseModel):
-    """ Validates login credentials """
+    """Validates login credentials"""
+
     email: str
     password: str
 
+
 class UserResponse(BaseModel):
-    """ Reads data from Users Table """
+    """Reads data from Users Table"""
+
     id: int
     email: str
     first_name: str
@@ -24,17 +32,23 @@ class UserResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class OrganizationCreate(BaseModel):
-    """ Validates input before insertion into Organization Table """
+    """Validates input before insertion into Organization Table"""
+
     org_name: str
 
+
 class OrganizationJoinRequest(BaseModel):
-    """ Validates input before Updating Organization Table """
+    """Validates input before Updating Organization Table"""
+
     user_id: int
     org_name: str
 
+
 class OrganizationResponse(BaseModel):
-    """ Read data from Organization Table """
+    """Read data from Organization Table"""
+
     id: int
     org_name: str
 
@@ -42,29 +56,35 @@ class OrganizationResponse(BaseModel):
 
 
 class AddMemberRequest(BaseModel):
-    member_id: int
-    role_id: int
+    email: str
+    role_name: str
     added_by: int
 
 
 class UpdateRoleRequest(BaseModel):
     role_id: int
 
+
 class RoleCreate(BaseModel):
-    """ Validates input before insertion into Roles Table """
+    """Validates input before insertion into Roles Table"""
+
     role_name: str
     permission_level: int
 
+
 class RoleResponse(BaseModel):
-    """ Reads data from Roles Table """
+    """Reads data from Roles Table"""
+
     id: int
     role_name: str
     permission_level: int
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class OrgMemberResponse(BaseModel):
-    """ Reads data from orgMember  Table """
+    """Reads data from orgMember  Table"""
+
     member_id: int
     organization_id: int
     role_id: int
@@ -72,8 +92,10 @@ class OrgMemberResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class ClientsCreate(BaseModel):
-    """ Validate input before insertion into clients table """
+    """Validate input before insertion into clients table"""
+
     organization_id: int
     name: str
     email: str
@@ -82,14 +104,17 @@ class ClientsCreate(BaseModel):
 
 
 class ClientsUpdate(BaseModel):
-    """ Validates input before updating clients Table """
+    """Validates input before updating clients Table"""
+
     name: str | None = None
     email: str | None = None
     contact_number: str | None = None
     reliability_score: int | None = None
 
+
 class ClientsResponse(BaseModel):
-    """ Reads data from clients table """
+    """Reads data from clients table"""
+
     id: int
     organization_id: int
     name: str
@@ -98,22 +123,27 @@ class ClientsResponse(BaseModel):
     reliability_score: int
 
     model_config = ConfigDict(from_attributes=True)
-    
+
 
 class RevenueCreate(BaseModel):
-    """ Validates input before insertion into Revenue Table """
+    """Validates input before insertion into Revenue Table"""
+
     client_id: int
     revenue_type: str
     date_expected: datetime
     amount: int
 
+
 class RevenueUpdate(BaseModel):
-    """ Validates input before updating Revenue Table """
+    """Validates input before updating Revenue Table"""
+
     date_received: datetime | None = None
     amount: int | None = None
 
+
 class RevenueResponse(BaseModel):
-    """ Reads data from Revenue table """
+    """Reads data from Revenue table"""
+
     id: int
     client_id: int
     revenue_type: str
@@ -125,22 +155,25 @@ class RevenueResponse(BaseModel):
 
 
 class ExpenseCreate(BaseModel):
-    """ Validates input before insertion into Expense Table """
     organization_id: int
-    urgency: str
-    expense_type: str
+    urgency: Literal["Critical", "Non-Critical"]
+    expense_type: Literal["One_Time", "Recurring"]
     date: datetime
-    amount: int
+    amount: int = Field(gt=0)
+
 
 class ExpenseUpdate(BaseModel):
-    """ Validates input before updating Expense Table """
+    """Validates input before updating Expense Table"""
+
     urgency: str | None = None
     expense_type: str | None = None
     date: datetime | None = None
     amount: int | None = None
 
+
 class ExpenseResponse(BaseModel):
-    """ Reads data from expense table """
+    """Reads data from expense table"""
+
     id: int
     organization_id: int
     urgency: str
@@ -152,12 +185,15 @@ class ExpenseResponse(BaseModel):
 
 
 class RiskAlertUpdate(BaseModel):
-    """ Validates input before updating RiskAlerts Table """
+    """Validates input before updating RiskAlerts Table"""
+
     status: str | None = None
     resolved_at: datetime | None = None
 
+
 class RiskAlertResponse(BaseModel):
-    """ Reads data from Risk Alert table """
+    """Reads data from Risk Alert table"""
+
     id: int
     expense_id: int | None
     revenue_id: int | None
@@ -172,12 +208,15 @@ class RiskAlertResponse(BaseModel):
 
 
 class SnapshotCreate(BaseModel):
-    """ Validates input before insertion into Financial Snapshot Table """
+    """Validates input before insertion into Financial Snapshot Table"""
+
     organization_id: int
     snapshot_type: str
 
+
 class SnapshotResponse(BaseModel):
-    """ Reads data from Financial Snapshots table """
+    """Reads data from Financial Snapshots table"""
+
     id: int
     organization_id: int
     snapshot_date: datetime

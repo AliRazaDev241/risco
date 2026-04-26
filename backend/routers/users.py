@@ -1,4 +1,5 @@
-""" API endpoints for Users """
+"""API endpoints for Users"""
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db import get_db
@@ -10,6 +11,7 @@ logger = get_logger(__name__)
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
+
 @router.post("/", response_model=schema.UserResponse)
 def register(user: schema.UserCreate, db: Session = Depends(get_db)):
     existing = user_service.get_user_by_email(user.email, db)
@@ -17,6 +19,7 @@ def register(user: schema.UserCreate, db: Session = Depends(get_db)):
         logger.warning("Registration attempt with existing email: %s", user.email)
         raise HTTPException(status_code=400, detail="Email already registered")
     return user_service.create_user(user, db)
+
 
 @router.post("/login", response_model=schema.UserResponse)
 def login(credentials: schema.UserLogin, db: Session = Depends(get_db)):
