@@ -113,11 +113,11 @@ class ClientsResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-
 class RevenueCreate(BaseModel):
-    client_id: int
+    client_name: str  # lookup by name instead of raw FK
     revenue_type: Literal["One_Time", "Recurring"]
     date_expected: datetime
+    date_received: datetime | None = None
     amount: int = Field(gt=0)
 
 class RevenueUpdate(BaseModel):
