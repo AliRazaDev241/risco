@@ -74,7 +74,7 @@ class Clients(Base):
 
     __table_args__ = (
         CheckConstraint(
-            "reliability_score BETWEEN 1 AND 100", name="chk_reliability_score"
+            "reliability_score BETWEEN 0 AND 100", name="chk_reliability_score"
         ),
     )
 
