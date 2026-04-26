@@ -40,7 +40,7 @@ def check_membership(user_id: int, org_id: int, db: Session):
 
 
 def create_organization(
-    org: schema.OrganizationCreate, creator_id: int, role_id: int, db: Session
+    org: schema.OrganizationCreate, creator_id: int, db: Session
 ):
     """Creates organization and adds creator as first member"""
     try:
@@ -50,7 +50,7 @@ def create_organization(
         member = OrganizationMembers(
             member_id=creator_id,
             organization_id=new_org.id,
-            role_id=role_id,
+            role_id=1,
             added_by=creator_id,
         )
         db.add(member)

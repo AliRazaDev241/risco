@@ -27,13 +27,12 @@ def get_user_organization(user_id: int, db: Session = Depends(get_db)):
 def create_organization(
     org: schema.OrganizationCreate,
     creator_id: int,
-    role_id: int,
     db: Session = Depends(get_db),
 ):
     existing = org_service.get_organization_by_name(org.org_name, db)
     if existing:
         raise HTTPException(status_code=400, detail="Organization name already taken")
-    return org_service.create_organization(org, creator_id, role_id, db)
+    return org_service.create_organization(org, creator_id, db)
 
 
 # join an org
