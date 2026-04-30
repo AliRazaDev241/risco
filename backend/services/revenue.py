@@ -49,8 +49,8 @@ def list_five_revenue(org_id: int, revenue_type: str, page_no: int, db: Session)
 
     offset = (page_no - 1) * 5
     rows = db.execute(text("""
-        SELECT clients.name AS client_name, clients.email AS client_email,
-               revenue.date_expected, revenue.date_received, revenue.amount
+        SELECT revenue.id, clients.name AS client_name, clients.email AS client_email,
+            revenue.date_expected, revenue.date_received, revenue.amount
         FROM revenue
         JOIN clients ON clients.id = revenue.client_id
         JOIN organizations ON organizations.id = clients.organization_id
@@ -61,3 +61,13 @@ def list_five_revenue(org_id: int, revenue_type: str, page_no: int, db: Session)
     """), {**params, "offset": offset}).fetchall()
 
     return {"items": rows, "total_pages": total_pages, "current_page": page_no}
+
+def update_revenue(revenue_id: int, data: schema.RevenueUpdate, db: Session):
+    row = db.get(Revenue, revenue_id)
+    if not row:
+        raise LookupError(f"No revenue found with id {revenue_id}")
+    if data.date_received is not None:
+        row.date_received = data.date_received
+    db.commit()
+    db.refresh(row)
+    return row

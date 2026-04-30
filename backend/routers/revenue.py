@@ -29,3 +29,15 @@ def list_revenue(org_id: int, revenue_type: str, page_no: int, db: Session = Dep
     except Exception as e:
         logger.error("Failed to fetch revenue for org %s: %s", org_id, e)
         raise HTTPException(status_code=500, detail="Failed to fetch revenue")
+
+@router.patch("/{revenue_id}", response_model=schema.RevenueResponse)
+def update_revenue(revenue_id: int, revenue: schema.RevenueUpdate, db: Session = Depends(get_db)):
+    try:
+        updated = revenue_service.update_revenue(revenue_id, revenue, db)
+        logger.info("Revenue %s updated successfully", revenue_id)
+        return updated
+    except LookupError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        logger.error("Failed to update revenue %s: %s", revenue_id, e)
+        raise HTTPException(status_code=500, detail="Failed to update revenue")
