@@ -204,112 +204,104 @@
 | 404  | Organization not found |
 | 500  | Failed to add expense |
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Financial Intelligence Page
+
 ## GET /revenue/
-- Usage: Lists 5 Revenue per Page 
+- **Usage:** List revenue entries (5 per page)
 
-### Parameter 
-org_id *
-integer
-(query)
-	
-revenue_type *
-string
-(query)
-	
-page_no *
-integer
-(query)
+### Parameters
+| Name         | In    | Type    | Required |
+|--------------|-------|---------|----------|
+| org_id       | query | integer | Yes      |
+| revenue_type | query | string  | Yes      |
+| page_no      | query | integer | Yes      |
 
-### Response
+### Response Body
+```json
+{
+  "items": [
     {
-    "items": [
-        {
-        "id": 0,
-        "client_name": "string",
-        "client_email": "string",
-        "date_expected": "2026-04-30T16:41:47.928Z",
-        "date_received": "2026-04-30T16:41:47.928Z",
-        "amount": 0
-        }
-    ],
-    "total_pages": 0,
-    "current_page": 0
+      "id": 0,
+      "client_name": "string",
+      "client_email": "string",
+      "date_expected": "2026-04-30T16:41:47.928Z",
+      "date_received": "2026-04-30T16:41:47.928Z",
+      "amount": 0
     }
+  ],
+  "total_pages": 0,
+  "current_page": 0
+}
+```
 
 ### Errors
-- 404: Organization Not Found
-- 500: Failed to Fetch Revenue
+| Code | Description |
+|------|-------------|
+| 404  | Organization not found |
+| 500  | Failed to fetch revenue |
+
+---
 
 ## PATCH /revenue/{revenue_id}
-- Usage: Updates Date Recieved for Revenue
+- **Usage:** Update the date received for a revenue entry
 
-### Parameter 
-revenue_id *
-integer
-(path)
+### Parameters
+| Name       | In   | Type    | Required |
+|------------|------|---------|----------|
+| revenue_id | path | integer | Yes      |
 
 ### Request Body
-    {
-    "date_received": "2025-04-30T14:25:41.271Z"
-    }
+```json
+{
+  "date_received": "2025-04-30T14:25:41.271Z"
+}
+```
 
-### Response
-    {
-    "id": 22,
-    "client_id": 23,
-    "revenue_type": "Recurring",
-    "date_expected": "2026-04-30T12:28:57",
-    "date_received": "2025-04-30T14:25:41",
-    "amount": 10000
-    }
+### Response Body
+```json
+{
+  "id": 22,
+  "client_id": 23,
+  "revenue_type": "Recurring",
+  "date_expected": "2026-04-30T12:28:57",
+  "date_received": "2025-04-30T14:25:41",
+  "amount": 10000
+}
+```
+
+---
 
 ## GET /expenses/
-- Usage: Lists 5 Expenses per Page 
+- **Usage:** List expense entries (5 per page)
 
-### Parameter 
-org_id *
-integer
-(query)
-	
-expense_type *
-string
-(query)
-	
-page_no *
-integer
-(query)
+### Parameters
+| Name         | In    | Type    | Required |
+|--------------|-------|---------|----------|
+| org_id       | query | integer | Yes      |
+| expense_type | query | string  | Yes      |
+| page_no      | query | integer | Yes      |
 
-### Response
+### Response Body
+```json
+{
+  "items": [
     {
-    "items": [
-        {
-        "urgency": "string",
-        "expense_type": "string",
-        "date": "2026-04-30T16:48:18.289Z",
-        "amount": 0
-        }
-    ],
-    "total_pages": 0,
-    "current_page": 0
+      "urgency": "string",
+      "expense_type": "string",
+      "date": "2026-04-30T16:48:18.289Z",
+      "amount": 0
     }
+  ],
+  "total_pages": 0,
+  "current_page": 0
+}
+```
 
 ### Errors
-- 404: Organization Not Found
-- 500: Failed to Fetch Expenses
+| Code | Description |
+|------|-------------|
+| 404  | Organization not found |
+| 500  | Failed to fetch expenses |
 
 
 
