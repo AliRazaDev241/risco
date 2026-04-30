@@ -62,6 +62,14 @@
 
 # Organizations Page
 
+## GET /organizations/user/{user_id}
+- **Usage:** Checks if User has an Organization
+
+
+## POST /organizations/
+- **Usage:** Creating an Organization
+
+
 ---
 
 # Operations Page
