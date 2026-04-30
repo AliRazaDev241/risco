@@ -63,12 +63,82 @@
 # Organizations Page
 
 ## GET /organizations/user/{user_id}
-- **Usage:** Checks if User has an Organization
+- **Usage:** Check if a user has an organization
 
+### Parameters
+| Name    | In   | Type    | Required |
+|---------|------|---------|----------|
+| user_id | path | integer | Yes      |
+
+### Response Body
+```json
+{
+  "id": 0,
+  "org_name": "string"
+}
+```
+
+### Errors
+| Code | Description |
+|------|-------------|
+| 404  | Organization not found |
+
+---
 
 ## POST /organizations/
-- **Usage:** Creating an Organization
+- **Usage:** Create a new organization
 
+### Parameters
+| Name       | In    | Type    | Required |
+|------------|-------|---------|----------|
+| creator_id | query | integer | Yes      |
+
+### Request Body
+```json
+{
+  "org_name": "string"
+}
+```
+
+### Response Body
+```json
+{
+  "id": 0,
+  "org_name": "string"
+}
+```
+
+### Errors
+| Code | Description |
+|------|-------------|
+| 400  | Organization name already taken |
+
+---
+
+## POST /organizations/join
+- **Usage:** Join an existing organization
+
+### Request Body
+```json
+{
+  "user_id": 0,
+  "org_name": "string"
+}
+```
+
+### Response Body
+```json
+{
+  "id": 0,
+  "org_name": "string"
+}
+```
+
+### Errors
+| Code | Description |
+|------|-------------|
+| 404  | Organization does not exist |
+| 403  | User is not a member of the given organization |
 
 ---
 
@@ -332,7 +402,6 @@
 
 
 ## POST /users/
-## POST /users/login
 - Usage: 
 
 ### Parameter
