@@ -1,0 +1,345 @@
+# Login/Register Page
+
+## POST /users/
+- **Usage:** Register a new user
+
+### Request Body
+```json
+{
+  "email": "string",
+  "password": "string",
+  "first_name": "string",
+  "last_name": "string"
+}
+```
+
+### Response Body
+```json
+{
+  "id": 0,
+  "email": "string",
+  "first_name": "string",
+  "last_name": "string",
+  "created_at": "2026-04-30T16:21:27.062Z"
+}
+```
+
+### Errors
+| Code | Description |
+|------|-------------|
+| 400  | Email already registered |
+
+---
+
+## POST /users/login
+- **Usage:** Log in a registered user
+
+### Request Body
+```json
+{
+  "email": "string",
+  "password": "string"
+}
+```
+
+### Response Body
+```json
+{
+  "id": 0,
+  "email": "string",
+  "first_name": "string",
+  "last_name": "string",
+  "created_at": "2026-04-30T16:32:50.647Z"
+}
+```
+
+### Errors
+| Code | Description |
+|------|-------------|
+| 401  | Invalid email or password |
+
+---
+
+# Organizations Page
+
+---
+
+# Operations Page
+
+## GET /organizations/{org_id}/members/
+- **Usage:** List all members of an organization
+
+### Parameters
+| Name   | In   | Type    | Required |
+|--------|------|---------|----------|
+| org_id | path | integer | Yes      |
+
+### Response Body
+```json
+[
+  {
+    "email": "string",
+    "role_name": "string"
+  }
+]
+```
+
+### Errors
+| Code | Description |
+|------|-------------|
+| 500  | Failed to fetch members |
+
+---
+
+## POST /organizations/{org_id}/members/
+- **Usage:** Add a member to an organization
+
+### Parameters
+| Name   | In   | Type    | Required |
+|--------|------|---------|----------|
+| org_id | path | integer | Yes      |
+
+### Request Body
+```json
+{
+  "email": "string",
+  "role_name": "string",
+  "added_by": 0
+}
+```
+
+### Errors
+| Code | Description |
+|------|-------------|
+| 201  | Member added successfully |
+| 404  | User not found |
+| 409  | Member is already part of the organization |
+| 500  | Failed to add member |
+
+---
+
+## DELETE /organizations/{org_id}/members/{member_id}
+- **Usage:** Remove a member from an organization
+
+### Parameters
+| Name      | In   | Type    | Required |
+|-----------|------|---------|----------|
+| org_id    | path | integer | Yes      |
+| member_id | path | integer | Yes      |
+
+### Errors
+| Code | Description |
+|------|-------------|
+| 200  | Member removed successfully |
+| 404  | Member is not part of the organization |
+| 500  | Failed to remove member |
+
+---
+
+## POST /revenue/
+- **Usage:** Add a revenue entry
+
+### Request Body
+```json
+{
+  "client_name": "string",
+  "revenue_type": "One_Time",
+  "date_expected": "2026-04-30T17:33:10.596Z",
+  "date_received": "2026-04-30T17:33:10.596Z",
+  "amount": 1
+}
+```
+
+### Response Body
+```json
+{
+  "id": 0,
+  "client_id": 0,
+  "revenue_type": "string",
+  "date_expected": "2026-04-30T17:33:10.597Z",
+  "date_received": "2026-04-30T17:33:10.597Z",
+  "amount": 0
+}
+```
+
+### Errors
+| Code | Description |
+|------|-------------|
+| 201  | Revenue added successfully |
+| 404  | Client not found |
+| 500  | Failed to add revenue |
+
+---
+
+## POST /expenses/
+- **Usage:** Add an expense entry
+
+### Request Body
+```json
+{
+  "organization_id": 0,
+  "urgency": "Critical",
+  "expense_type": "One_Time",
+  "date": "2026-04-30T17:33:10.582Z",
+  "amount": 1
+}
+```
+
+### Response Body
+```json
+{
+  "id": 0,
+  "organization_id": 0,
+  "urgency": "string",
+  "expense_type": "string",
+  "date": "2026-04-30T17:33:10.606Z",
+  "amount": 0
+}
+```
+
+### Errors
+| Code | Description |
+|------|-------------|
+| 201  | Expense added successfully |
+| 404  | Organization not found |
+| 500  | Failed to add expense |
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Financial Intelligence Page
+## GET /revenue/
+- Usage: Lists 5 Revenue per Page 
+
+### Parameter 
+org_id *
+integer
+(query)
+	
+revenue_type *
+string
+(query)
+	
+page_no *
+integer
+(query)
+
+### Response
+    {
+    "items": [
+        {
+        "id": 0,
+        "client_name": "string",
+        "client_email": "string",
+        "date_expected": "2026-04-30T16:41:47.928Z",
+        "date_received": "2026-04-30T16:41:47.928Z",
+        "amount": 0
+        }
+    ],
+    "total_pages": 0,
+    "current_page": 0
+    }
+
+### Errors
+- 404: Organization Not Found
+- 500: Failed to Fetch Revenue
+
+## PATCH /revenue/{revenue_id}
+- Usage: Updates Date Recieved for Revenue
+
+### Parameter 
+revenue_id *
+integer
+(path)
+
+### Request Body
+    {
+    "date_received": "2025-04-30T14:25:41.271Z"
+    }
+
+### Response
+    {
+    "id": 22,
+    "client_id": 23,
+    "revenue_type": "Recurring",
+    "date_expected": "2026-04-30T12:28:57",
+    "date_received": "2025-04-30T14:25:41",
+    "amount": 10000
+    }
+
+## GET /expenses/
+- Usage: Lists 5 Expenses per Page 
+
+### Parameter 
+org_id *
+integer
+(query)
+	
+expense_type *
+string
+(query)
+	
+page_no *
+integer
+(query)
+
+### Response
+    {
+    "items": [
+        {
+        "urgency": "string",
+        "expense_type": "string",
+        "date": "2026-04-30T16:48:18.289Z",
+        "amount": 0
+        }
+    ],
+    "total_pages": 0,
+    "current_page": 0
+    }
+
+### Errors
+- 404: Organization Not Found
+- 500: Failed to Fetch Expenses
+
+
+
+
+
+
+
+
+
+# Dashboard Page
+
+
+# Clients Page
+
+
+# Risk Alerts
+
+
+# Role Based Access
+
+
+## POST /users/
+## POST /users/login
+- Usage: 
+
+### Parameter
+
+### Request Body
+
+### Response Body
+
+### Errors
+- 400: 
