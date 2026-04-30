@@ -182,6 +182,17 @@ class ExpenseResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class ExpenseListItem(BaseModel):
+    urgency: str
+    expense_type: str
+    date: datetime
+    amount: int
+    model_config = ConfigDict(from_attributes=True)
+
+class ExpensePage(BaseModel):
+    items: list[ExpenseListItem]
+    total_pages: int
+    current_page: int
 
 class RiskAlertUpdate(BaseModel):
     """Validates input before updating RiskAlerts Table"""
