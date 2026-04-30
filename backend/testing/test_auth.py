@@ -2,7 +2,7 @@
 
 import pytest
 from unittest.mock import MagicMock, patch
-from services import users as user_service
+from services import auth as user_service
 import schema
 
 # ── Fixtures ────────────────────────────────────────────────────────────────

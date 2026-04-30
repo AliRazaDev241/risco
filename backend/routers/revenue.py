@@ -17,3 +17,15 @@ def add_revenue(revenue: schema.RevenueCreate, db: Session = Depends(get_db)):
     except Exception as e:
         logger.error("Failed to add revenue: %s", e)
         raise HTTPException(status_code=500, detail="Failed to add revenue")
+
+
+@router.get("/", response_model=schema.RevenuePage)
+def list_revenue(org_id: int, revenue_type: str, page_no: int, db: Session = Depends(get_db)):
+    try:
+        return revenue_service.list_five_revenue(org_id, revenue_type, page_no, db)
+    except LookupError as e:
+        logger.error("Failed to fetch revenue for org %s: %s", org_id, e)
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        logger.error("Failed to fetch revenue for org %s: %s", org_id, e)
+        raise HTTPException(status_code=500, detail="Failed to fetch revenue")

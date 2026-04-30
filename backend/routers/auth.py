@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db import get_db
 import schema
-from services import users as user_service
+from services import auth as user_service
 from logger import get_logger
 
 logger = get_logger(__name__)

@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import (
-    users,
+    auth,
     organizations,
     organization_members,
     expenses,
@@ -27,7 +27,7 @@ def root():
     return {"message": "RISCO API is running"}
 
 
-app.include_router(users.router)
+app.include_router(auth.router)
 app.include_router(organizations.router)
 app.include_router(organization_members.router)
 app.include_router(expenses.router)

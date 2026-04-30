@@ -139,6 +139,19 @@ class RevenueResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class RevenueListItem(BaseModel):
+    client_name: str
+    client_email: str
+    date_expected: datetime
+    date_received: datetime | None
+    amount: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+class RevenuePage(BaseModel):
+    items: list[RevenueListItem]
+    total_pages: int
+    current_page: int
 
 class ExpenseCreate(BaseModel):
     organization_id: int
