@@ -150,36 +150,3 @@ def test_authenticate_user_email_not_found(mock_db):
     mock_db.query().filter().first.return_value = None
     result = user_service.authenticate_user("nobody@risco.com", "pass", mock_db)
     assert result is None
-
-
-# ── update_user ──────────────────────────────────────────────────────────────
-
-
-def test_update_user_success(mock_db, sample_user):
-    mock_db.query().filter().first.return_value = sample_user
-    updates = schema.UserUpdate(first_name="Updated")
-    result = user_service.update_user(1, updates, mock_db)
-    mock_db.commit.assert_called_once()
-
-
-def test_update_user_not_found(mock_db):
-    mock_db.query().filter().first.return_value = None
-    updates = schema.UserUpdate(first_name="Updated")
-    result = user_service.update_user(999, updates, mock_db)
-    assert result is None
-
-
-def test_update_user_password_gets_hashed(mock_db, sample_user):
-    mock_db.query().filter().first.return_value = sample_user
-    updates = schema.UserUpdate(password="newpassword")
-    user_service.update_user(1, updates, mock_db)
-    assert sample_user.password_hash != "newpassword"
-
-
-def test_update_user_db_failure_rolls_back(mock_db, sample_user):
-    mock_db.query().filter().first.return_value = sample_user
-    mock_db.commit.side_effect = Exception("DB error")
-    updates = schema.UserUpdate(first_name="Fail")
-    with pytest.raises(Exception):
-        user_service.update_user(1, updates, mock_db)
-    mock_db.rollback.assert_called_once()

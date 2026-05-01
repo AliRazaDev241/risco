@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db import get_db
 import schema
-from services import intelligence as financial_service
+from services import financial as financial_service
 from logger import get_logger
 
 logger = get_logger(__name__)
