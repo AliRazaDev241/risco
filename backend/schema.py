@@ -231,7 +231,12 @@ class RiskAlertResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-
+class DashboardResponse(BaseModel):
+    cash_runway: float | None
+    burn_rate: float
+    cash_balance: int
+    monthly_revenue: int
+    headcount: int
 class SnapshotResponse(BaseModel):
     """Reads data from Financial Snapshots table"""
 

@@ -51,11 +51,6 @@ def total_revenue(amounts: list[float]) -> float:
 
 
 
-
-def burn_rate(monthly_expenses: float) -> float:
-    """ how much the organization spends per month """
-    return monthly_expenses
-
 def cash_runway(cash_balance: float, monthly_expenses: float) -> float | None:
     """
     Months of cash remaining at current expense rate.
@@ -65,6 +60,7 @@ def cash_runway(cash_balance: float, monthly_expenses: float) -> float | None:
     if monthly_expenses <= 0:
         return None
     return cash_balance / monthly_expenses
+
 
 def cash_balance(cash_balance_previous: float | None, monthly_revenue: float, monthly_expenses: float) -> float:
     """

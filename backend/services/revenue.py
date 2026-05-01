@@ -8,11 +8,12 @@ logger = get_logger(__name__)
 
 def add_revenue(revenue: schema.RevenueCreate, db: Session):
     client_row = db.execute(
-        text("SELECT id FROM clients WHERE name = :name AND organization_id = :org_id"),
-        {"name": revenue.client_name, "org_id": revenue.org_id}
+        text("SELECT id FROM clients WHERE name = :name"),
+        {"name": revenue.client_name}
     ).fetchone()
     if not client_row:
-        raise LookupError(f"No client '{revenue.client_name}' found in organization {revenue.org_id}")
+        raise LookupError(f"No client found with name {revenue.client_name}")
+
     try:
         new_revenue = Revenue(
             client_id=client_row.id,

@@ -18,3 +18,13 @@ def get_intelligence(org_id: int, db: Session = Depends(get_db)):
     except Exception as e:
         logger.error("Failed to fetch intelligence metrics for org %s: %s", org_id, e)
         raise HTTPException(status_code=500, detail="Failed to fetch intelligence metrics")
+    
+@router.get("/dashboard", response_model=schema.DashboardResponse)
+def get_dashboard(org_id: int, db: Session = Depends(get_db)):
+    try:
+        return financial_service.get_dashboard_metrics(org_id, db)
+    except LookupError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        logger.error("Failed to fetch intelligence metrics for org %s: %s", org_id, e)
+        raise HTTPException(status_code=500, detail="Failed to fetch Dashboard Metrics")
