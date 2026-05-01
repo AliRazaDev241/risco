@@ -220,10 +220,11 @@
 ### Request Body
 ```json
 {
+  "org_id": 0,
   "client_name": "string",
   "revenue_type": "One_Time",
-  "date_expected": "2026-04-30T17:33:10.596Z",
-  "date_received": "2026-04-30T17:33:10.596Z",
+  "date_expected": "2026-05-01T07:31:13.226Z",
+  "date_received": "2026-05-01T07:31:13.226Z",
   "amount": 1
 }
 ```

@@ -1,166 +1,220 @@
-# RISCO DBMS (Outdated Read Me)
+# RISCO
 
-A CLI-based financial management system for organizations to track revenue, expenses, clients, and risk alerts. Built with Python and PostgreSQL, designed to be upgraded to a FastAPI + Flutter full-stack application.
+A financial risk management system for Startups that face uncertainities in various forms.
+
+---
+
+## Overview
+
+RISCO is a full stack financial database management system built as a student project. It allows organizations to manage their financial data across a structured hierarchy: organizations → members → clients → revenue/expenses → risk alerts → financial snapshots.
+
+The system is designed with a **monolithic 3-tier architecture** — React frontend, FastAPI backend, and Oracle Database — with clean internal layering (routers → services → models) for high cohesion and low coupling.
 
 ---
 
 ## Tech Stack
-- Python 3.11
-- PostgreSQL
-- psycopg2 — PostgreSQL driver
-- tabulate — CLI table formatting
-- python-dotenv — environment variable management
+
+| Layer       | Technology                                      |
+|-------------|--------------------------------------------------|
+| Frontend    | React *(in progress)*                           |
+| Backend     | Python 3.11, FastAPI, SQLAlchemy ORM, Pydantic  |
+| Database    | Oracle Database 21c Enterprise Edition          |
+| Analysis    | NumPy *(planned)*, TensorFlow / Scikit-learn *(planned)* |
+| Migrations  | Alembic *(planned)*                             |
+| Dev Tooling | Conda, GitHub CLI                               |
 
 ---
 
-## Project Structure
+## Architecture
 
-### Root
-| File | Purpose |
-|------|---------|
-| `db.py` | PostgreSQL connection. Single source for all database access. |
-| `models.py` | Dataclasses mirroring database tables. Used by services to return structured data instead of raw tuples. |
-| `requirements.txt` | All Python dependencies. |
-| `.env` | Database credentials. Never committed to git. |
-
----
-
-### `services/`
-Business logic and all database queries. No printing, no input, no menus — just functions that talk to the database. When migrating to FastAPI, these files are reused directly as the API layer.
-
-| File | Purpose |
-|------|---------|
-| `auth.py` | User registration, login, and password hashing. |
-| `organizations.py` | Creating and retrieving organizations. |
-| `members.py` | Adding and listing organization members and their roles. |
-| `clients.py` | Adding and listing clients. |
-| `revenue.py` | Adding revenue records. Calculates MRR, reliable revenue, and top client dependency. |
-| `expenses.py` | Adding expense records. Calculates burn rate and critical vs non-critical breakdown. |
-| `risk_alerts.py` | Fetching risk alerts filtered by type and status. |
-| `snapshots.py` | Generating base, best, and worst case financial snapshots. |
-| `overview.py` | Calculating cash runway, headcount, and cash balance for the dashboard. |
-
----
-
-### `cli/`
-Presentation layer. Handles all menus, user input, and output formatting. Calls services for all data operations. Replaced by FastAPI routes and Flutter UI in the full-stack version.
-
-| File | Purpose |
-|------|---------|
-| `main.py` | Entry point. Launches the authentication menu. |
-
-#### `cli/menus/`
-Each file corresponds to one screen in the application.
-
-| File | Purpose |
-|------|---------|
-| `auth.py` | Register, login, and exit menu. |
-| `dashboard.py` | Main dashboard. Displays cash balance, burn rate, runway, and risk alerts on entry. |
-| `expenses.py` | Expense Intelligence screen. Shows burn rate, critical breakdown, and expense risk alerts. |
-| `revenue.py` | Revenue Intelligence screen. Shows MRR, client reliability, dependency percentage, and revenue risk alerts. |
-
-#### `cli/menus/operations/`
-Operations submenu for all data entry and management actions.
-
-| File | Purpose |
-|------|---------|
-| `main.py` | Operations submenu entry point. |
-| `members.py` | Add and view organization members. |
-| `clients.py` | Add and view clients. |
-| `revenue_entry.py` | Form to record a new revenue entry. |
-| `expense_entry.py` | Form to record a new expense entry. |
-
-#### `cli/utils/`
-Shared utilities used across all menus.
-
-| File | Purpose |
-|------|---------|
-| `display.py` | Tabulate wrappers for consistent table formatting and ASCII graphs. |
-| `prompts.py` | Input helpers with validation for emails, amounts, dates, and other common fields. |
-| `session.py` | Stores the logged-in user and organization in memory. Read by menus and services to avoid passing IDs as parameters everywhere. |
-| `logger.py` | Centralized logging setup. All modules import the logger from here. |
-
----
-
-### `logs/`
-Application logs generated at runtime. Not committed to git.
-
-| File | Purpose |
-|------|---------|
-| `app.log` | Generated automatically on first run. Records info, warnings, and errors. |
-
----
-
-## Setup
-
-1. Clone the repository
-2. Create and activate the conda environment
-```bash
-conda create -n riscoCLI python=3.11
-conda activate riscoCLI
 ```
-3. Install dependencies
+React (Frontend)
+      │
+      ▼
+FastAPI (Backend)
+  ├── routers/       ← HTTP layer, request/response handling
+  ├── services/      ← Business logic
+  ├── models/        ← SQLAlchemy ORM models (database layer)
+  └── schemas/       ← Pydantic schemas (API layer)
+      │
+      ▼
+Oracle Database 21c
+  └── Pluggable Database: orcl21pdb
+```
+
+---
+
+## Features
+
+### Completed
+- [x] CLI phase (Python + PostgreSQL)
+- [x] Oracle DB migration with full schema (9 tables, 1NF–4NF normalized)
+- [x] SQLAlchemy ORM models for all entities
+- [x] Pydantic schemas (Create / Update / Response) for all entities
+- [x] FastAPI backend with router/service separation
+- [x] Structured logging (`db.log`, `error.log`)
+
+### In Progress
+- [ ] Remaining routers and services
+- [ ] React dashboard
+
+### Planned
+- [ ] Predictive analysis module — Base / Worst / Best case financial snapshots using NumPy and client reliability scores
+- [ ] ANN model via TensorFlow or Scikit-learn (once sufficient data accumulates)
+- [ ] Alembic database migrations
+- [ ] GitHub Pages documentation site
+
+---
+
+## Prerequisites
+
+Make sure the following are installed before setting up the project:
+
+- [Python 3.11](https://www.python.org/downloads/)
+- [Conda](https://docs.conda.io/en/latest/miniconda.html)
+- [Oracle Database 21c](https://www.oracle.com/database/technologies/) (with a configured Pluggable Database)
+- [Node.js](https://nodejs.org/) *(for the React frontend, once available)*
+- [GitHub CLI](https://cli.github.com/) *(optional)*
+
+> **Oracle setup note:** Ensure the Oracle listener is running and your PDB is configured to open automatically on startup. You can verify your full service name by running `lsnrctl status` in your terminal.
+
+---
+
+## Installation
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/AliRazaDev241/risco.git
+cd risco
+```
+
+### 2. Create and activate the Conda environment
+
+```bash
+conda create -n risco python=3.11
+conda activate risco
+```
+
+### 3. Install dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Run the application
+### 4. Configure environment variables
+
 ```bash
-python cli/main.py
+cp .env.example .env
 ```
+
+Open `.env` and fill in your Oracle credentials (see [Environment Variables](#environment-variables) below).
+
+### 5. Initialize the database
+
+```bash
+python init_db.py
+```
+
+This creates all tables in your Oracle PDB. Safe to re-run — it only creates tables that don't already exist.
+
+### 6. Start the development server
+
+```bash
+uvicorn main:app --reload
+```
+
+The API will be available at `http://localhost:8000`.
 
 ---
 
-## Architecture Notes
-- Services are completely decoupled from the CLI layer. When migrating to FastAPI, services are reused directly as route handlers.
-- Models are dataclasses — easily converted to Pydantic models for FastAPI with minimal changes.
-- Session state is held in memory during the CLI session. Replaced by JWT tokens in the full-stack version.
+## Environment Variables
+
+Copy `.env.example` to `.env` and fill in the values:
+
+```env
+DB_HOST=localhost
+DB_PORT=1521
+DB_SERVICE_NAME=orclpdb.bbrouter   # Verify with: lsnrctl status
+DB_USER=risco
+DB_PASSWORD=your_password_here
 ```
+
+> ⚠️ Never commit your `.env` file. It is already listed in `.gitignore`.
+---
+ 
+## Project Structure
+ 
+```
+risco/
+├── backend/
+│   ├── routers/             # FastAPI route handlers
+│   ├── services/            # Business logic
+│   ├── testing/             # Test suite
+│   ├── documentation/       # Backend docs
+│   ├── logs/                # Runtime log files (db.log, error.log)
+│   ├── main.py              # FastAPI app entry point
+│   ├── db.py                # Oracle DB connection & session management
+│   ├── init_db.py           # Table creation script
+│   ├── logger.py            # Structured logging setup
+│   ├── models.py            # SQLAlchemy ORM models (all 9 tables)
+│   ├── schema.py            # Pydantic schemas (all entities)
+│   ├── seed.py              # Database seeding script
+│   └── api.md               # API reference notes
+│
+├── risco-fronntend/         # React frontend (Vite + Tailwind)
+│   ├── public/
+│   ├── src/
+│   │   ├── assets/
+│   │   ├── pages/
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── login.jsx
+│   │   │   ├── OrgSelect.jsx
+│   │   │   └── Register.jsx
+│   │   ├── App.jsx
+│   │   ├── App.css
+│   │   ├── main.jsx
+│   │   └── index.css
+│   ├── index.html
+│   ├── tailwind.config.js
+│   ├── vite.config.js
+│   └── package.json
+│
+├── .env                     # Backend environment variables
+├── db.env                   # Database-specific environment variables
+└── .gitignore
+```
+ 
+---
+
+
+## API Documentation
+
+Once the server is running, interactive API docs are available automatically via FastAPI:
+
+- **Swagger UI:** [http://localhost:8000/docs](http://localhost:8000/docs)
+- **ReDoc:** [http://localhost:8000/redoc](http://localhost:8000/redoc)
 
 ---
 
-### `.gitignore`
-```
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
+## Database Schema
 
-# Environment
-.env
-.env.*
+The schema covers 9 tables normalized to 4NF:
 
-# Logs
-logs/*.log
+| Table                  | Description                                      |
+|------------------------|--------------------------------------------------|
+| `Users`                | System users with authentication info            |
+| `Organization`         | Top-level organizational entities                |
+| `Roles`                | Roles within an organization                     |
+| `OrganizationMembers`  | Users linked to organizations with roles         |
+| `Clients`              | Clients belonging to an organization             |
+| `Revenue`              | Revenue records linked to clients                |
+| `Expenses`             | Expense records linked to organizations          |
+| `RiskAlerts`           | Alerts generated based on financial thresholds   |
+| `FinancialSnapshots`   | Periodic financial summaries (Base/Worst/Best)   |
 
-# Conda / virtualenv
-env/
-venv/
-.conda/
+---
 
-# IDEs
-.vscode/
-.idea/
-*.suo
-*.user
+## License
 
-# OS
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# Distribution
-dist/
-build/
-*.egg-info/
-
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Database
-*.sql
-*.dump
+This project is for academic purposes. All rights reserved.
