@@ -134,6 +134,13 @@ class RevenueUpdate(BaseModel):
             raise ValueError("date_received cannot be in the future")
         return v
 
+class IntelligenceResponse(BaseModel):
+    revenue_reliability_score: float    # 0-100, weighted avg reliability of clients
+    revenue_concentration_risk: float   # 0-1 HHI, higher = more concentrated = riskier
+    reliable_revenue: float             # expected revenue weighted by reliability scores
+    total_revenue_expected: float       # sum of all expected revenue this month
+    actual_revenue: float               # sum of received revenue this month
+
 class RevenueResponse(BaseModel):
     """Reads data from Revenue table"""
 

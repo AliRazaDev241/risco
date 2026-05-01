@@ -1,25 +1,34 @@
-"""Pure financial calculations — no DB access, no models imported"""
+"""Pure financial calculations"""
 from sqlalchemy import func, extract
 
 
 
 def burn_rate(monthly_expenses: float) -> float:
-    """
-    Monthly cash burn — how much the organization spends per month.
-    """
+    """ how much the organization spends per month """
     return monthly_expenses
-
 
 def cash_runway(cash_balance: float, monthly_expenses: float) -> float | None:
     """
     Months of cash remaining at current expense rate.
-    Returns None if expenses are zero (undefined).
+    Returns None if expenses are zero
     If profitable, returns None to signal 'not applicable'.
     """
     if monthly_expenses <= 0:
         return None
     return cash_balance / monthly_expenses
 
+def cash_balance(cash_balance_previous: float | None, monthly_revenue: float, monthly_expenses: float) -> float:
+    """
+    Current cash balance.
+    Previous balance + revenue received this month - expenses this month.
+    If no previous balance exists (first month), starts from 0.
+    """
+    previous = cash_balance_previous if (cash_balance_previous is not None and cash_balance_previous >= 0) else 0.0
+    return previous + monthly_revenue - monthly_expenses
+
+def total_revenue(amounts: list[float]) -> float:
+    """Sum of all expected revenue amounts for the period."""
+    return sum(amounts)
 
 def reliable_revenue(amounts: list[float], reliability_scores: list[int]) -> float:
     """

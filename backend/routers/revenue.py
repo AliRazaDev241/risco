@@ -10,6 +10,7 @@ from logger import get_logger
 logger = get_logger(__name__)
 router = APIRouter(prefix="/revenue", tags=["Revenue"])
 
+
 @router.post("/", response_model=schema.RevenueResponse, status_code=201)
 def add_revenue(revenue: schema.RevenueCreate, db: Session = Depends(get_db)):
     try:
