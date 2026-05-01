@@ -225,11 +225,6 @@ class RiskAlertResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class SnapshotCreate(BaseModel):
-    organization_id: int
-    snapshot_type: Literal["Base", "Best", "Worst"]
-
-
 class SnapshotResponse(BaseModel):
     """Reads data from Financial Snapshots table"""
 

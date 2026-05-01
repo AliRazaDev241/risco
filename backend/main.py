@@ -9,6 +9,7 @@ from routers import (
     expenses,
     clients,
     revenue,
+    snapshots,
 )
 
 app = FastAPI(title="RISCO")
@@ -33,9 +34,9 @@ app.include_router(organization_members.router)
 app.include_router(expenses.router)
 app.include_router(clients.router)
 app.include_router(revenue.router)
+app.include_router(snapshots.router)
 
 """
 app.include_router(roles.router)
 app.include_router(risk_alerts.router)
-app.include_router(financial_snapshots.router)
 """
