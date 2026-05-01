@@ -22,10 +22,24 @@ export default function Login() {
 
       const data = await response.json()
 
+      // if (response.ok) {
+      //   localStorage.setItem("token", data.token || "logged-in")
+      //   // alert("Login successful! Redirect to dashboard here.")
+      //   window.location.href = "/orgselect"
+      // }
       if (response.ok) {
         localStorage.setItem("token", data.token || "logged-in")
-        // alert("Login successful! Redirect to dashboard here.")
-        window.location.href = "/orgselect"
+        localStorage.setItem("user_id", data.id)
+        // window.location.href = "/orgselect"
+        // Check if user already has an org
+        const orgResponse = await fetch(`http://127.0.0.1:8000/organizations/user/${data.id}`)
+        if (orgResponse.ok) {
+          // User has an org, go to dashboard
+          window.location.href = "/dashboard"
+        } else {
+          // User has no org, go to OrgSelect
+          window.location.href = "/orgselect"
+        }
       } else {
         setError(data.detail || "Invalid email or password")
       }
