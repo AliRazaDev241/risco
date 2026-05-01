@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from sqlalchemy import func, extract, text
 from models import Revenue, Expenses, Clients, FinancialSnapshots
-from services import calculations as calculations_service
+from services.calculations import revenue_concentration_risk, reliable_revenue
 from logger import get_logger
 
 logger = get_logger(__name__)
@@ -20,8 +20,8 @@ def get_range(org_id: int, start_date: datetime, end_date: datetime, db: Session
 
 def refresh_or_create(db: Session, org_id: int):
     _upsert_base(db, org_id)
-    # _upsert_best(db, org_id)
-    # _upsert_worst(db, org_id)
+    _upsert_best(db, org_id)
+    _upsert_worst(db, org_id)
 
 def _upsert_snapshot(db: Session, org_id: int, snapshot_type: str, monthly_revenue, monthly_expenses):
     now = datetime.now(timezone.utc)
@@ -75,12 +75,47 @@ def _upsert_base(db: Session, org_id: int):
     _upsert_snapshot(db, org_id, "Base", monthly_revenue, monthly_expenses)  # capital B to match constraint
 
 def _upsert_best(db: Session, org_id: int):
-    projected = calculations_service.calculate_best(db, org_id)
-    _upsert_snapshot(db, org_id, "best", projected.revenue, projected.expenses)
-    pass
+    now = datetime.now(timezone.utc)
+    month, year = now.month, now.year
 
+    expected_amounts = db.execute(text("""
+        SELECT r.amount FROM revenue r
+        JOIN clients c ON c.id = r.client_id
+        WHERE c.organization_id = :org_id
+        AND EXTRACT(MONTH FROM r.date_expected) = :month
+        AND EXTRACT(YEAR FROM r.date_expected) = :year
+    """), {"org_id": org_id, "month": month, "year": year}).fetchall()
+
+    non_critical_expenses = db.execute(text("""
+        SELECT NVL(SUM(amount), 0) FROM expenses
+        WHERE organization_id = :org_id
+        AND urgency = 'Non-Critical'
+        AND EXTRACT(MONTH FROM date) = :month
+        AND EXTRACT(YEAR FROM date) = :year
+    """), {"org_id": org_id, "month": month, "year": year}).scalar()
+
+    amounts = [row.amount for row in expected_amounts]
+    _upsert_snapshot(db, org_id, "Best", sum(amounts), non_critical_expenses)
 
 def _upsert_worst(db: Session, org_id: int):
-    projected = calculations_service.calculate_worst(db, org_id)
-    _upsert_snapshot(db, org_id, "worst", projected.revenue, projected.expenses)
-    pass
+    now = datetime.now(timezone.utc)
+    month, year = now.month, now.year
+
+    client_revenue = db.execute(text("""
+        SELECT r.amount, c.reliability_score FROM revenue r
+        JOIN clients c ON c.id = r.client_id
+        WHERE c.organization_id = :org_id
+        AND EXTRACT(MONTH FROM r.date_expected) = :month
+        AND EXTRACT(YEAR FROM r.date_expected) = :year
+    """), {"org_id": org_id, "month": month, "year": year}).fetchall()
+
+    all_expenses = db.execute(text("""
+        SELECT NVL(SUM(amount), 0) FROM expenses
+        WHERE organization_id = :org_id
+        AND EXTRACT(MONTH FROM date) = :month
+        AND EXTRACT(YEAR FROM date) = :year
+    """), {"org_id": org_id, "month": month, "year": year}).scalar()
+
+    amounts = [row.amount for row in client_revenue]
+    scores = [row.reliability_score for row in client_revenue]
+    _upsert_snapshot(db, org_id, "Worst", reliable_revenue(amounts, scores), all_expenses)

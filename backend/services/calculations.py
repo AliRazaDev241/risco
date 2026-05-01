@@ -49,8 +49,6 @@ def total_revenue(amounts: list[float]) -> float:
     """Sum of all expected revenue amounts for the period."""
     return sum(amounts)
 
-
-
 def cash_runway(cash_balance: float, monthly_expenses: float) -> float | None:
     """
     Months of cash remaining at current expense rate.
@@ -70,77 +68,3 @@ def cash_balance(cash_balance_previous: float | None, monthly_revenue: float, mo
     """
     previous = cash_balance_previous if (cash_balance_previous is not None and cash_balance_previous >= 0) else 0.0
     return previous + monthly_revenue - monthly_expenses
-
-def calculate_best(db, org_id: int, month: int, year: int) -> dict:
-    """
-    Best case projection:
-    - Revenue: all expected revenue for the month (date_expected), not just received
-    - Expenses: Non-Critical only (minimal spending scenario)
-    """
-    from models import Revenue, Expenses, Clients
-
-    expected_amounts = [
-        row.amount for row in db.query(Revenue).join(
-            Clients, Revenue.client_id == Clients.id
-        ).filter(
-            Clients.organization_id == org_id,
-            extract('month', Revenue.date_expected) == month,
-            extract('year', Revenue.date_expected) == year
-        ).all()
-    ]
-
-    non_critical_expenses = db.query(func.sum(Expenses.amount)).filter(
-        Expenses.organization_id == org_id,
-        Expenses.urgency == "Non-Critical",
-        extract('month', Expenses.date) == month,
-        extract('year', Expenses.date) == year
-    ).scalar() or 0
-
-    best_revenue = sum(expected_amounts)
-    best_expenses = non_critical_expenses
-
-    return {
-        "monthly_revenue": best_revenue,
-        "monthly_expense": best_expenses,
-        "cash_balance": best_revenue - best_expenses,
-        "concentration_risk": revenue_concentration_risk(expected_amounts),
-    }
-
-
-def calculate_worst(db, org_id: int, month: int, year: int) -> dict:
-    """
-    Worst case projection:
-    - Revenue: reliable revenue only (weighted by client reliability scores)
-    - Expenses: all expenses, Critical + Non-Critical
-    """
-    from models import Revenue, Expenses, Clients
-
-    client_revenue = db.query(
-        Revenue.amount,
-        Clients.reliability_score
-    ).join(
-        Clients, Revenue.client_id == Clients.id
-    ).filter(
-        Clients.organization_id == org_id,
-        extract('month', Revenue.date_expected) == month,
-        extract('year', Revenue.date_expected) == year
-    ).all()
-
-    amounts = [row.amount for row in client_revenue]
-    scores = [row.reliability_score for row in client_revenue]
-
-    all_expenses = db.query(func.sum(Expenses.amount)).filter(
-        Expenses.organization_id == org_id,
-        extract('month', Expenses.date) == month,
-        extract('year', Expenses.date) == year
-    ).scalar() or 0
-
-    worst_revenue = reliable_revenue(amounts, scores)
-    worst_expenses = all_expenses
-
-    return {
-        "monthly_revenue": worst_revenue,
-        "monthly_expense": worst_expenses,
-        "cash_balance": worst_revenue - worst_expenses,
-        "concentration_risk": revenue_concentration_risk(amounts),
-    }
