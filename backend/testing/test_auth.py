@@ -95,7 +95,7 @@ def test_create_user_success(mock_db):
     # Change password_hash= to password= in all three create_user tests
     user_data = schema.UserCreate(
         email="new@risco.com",
-        password="pass123",  # not password_hash
+        password="pass1234",  # not password_hash
         first_name="New",
         last_name="User",
     )
@@ -109,7 +109,7 @@ def test_create_user_password_is_hashed(mock_db):
     # Change password_hash= to password= in all three create_user tests
     user_data = schema.UserCreate(
         email="new@risco.com",
-        password="pass123",  # not password_hash
+        password="pass1234",  # not password_hash
         first_name="New",
         last_name="User",
     )
@@ -122,7 +122,7 @@ def test_create_user_password_is_hashed(mock_db):
 def test_create_user_db_failure_rolls_back(mock_db):
     mock_db.commit.side_effect = Exception("DB error")
     user_data = schema.UserCreate(
-        email="fail@risco.com", password="pass", first_name="Fail", last_name="User"
+        email="fail@risco.com", password="password123", first_name="Fail", last_name="User"
     )
     with pytest.raises(Exception):
         user_service.create_user(user_data, mock_db)
