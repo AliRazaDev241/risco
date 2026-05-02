@@ -285,6 +285,7 @@
 // }
 
 import { useState } from "react";
+import Operations from "./Operations"
 
 const navItems = [
   { id: "overview", label: "Dashboard" },
@@ -411,13 +412,21 @@ export default function Dashboard() {
           </div>
         )}
 
-        {active === "operations" && (
+        {/* {active === "operations" && (
           <div>
             <h2 className="text-2xl font-bold text-[#1a3a32] mb-1">Operations</h2>
             <p className="text-gray-400 text-sm mb-8">Manage your team, clients and entries.</p>
             <div className="bg-white/70 backdrop-blur border border-teal-100 rounded-2xl p-6 text-gray-400 text-sm shadow-sm">
               Coming soon — operations panels will go here.
             </div>
+          </div>
+        )} */}
+
+        {active === "operations" && (
+          <div>
+            <h2 className="text-2xl font-bold text-[#1a3a32] mb-1">Operations</h2>
+            <p className="text-gray-400 text-sm mb-8">Manage your team, clients and entries.</p>
+            <Operations />
           </div>
         )}
 

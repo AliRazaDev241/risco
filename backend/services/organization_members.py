@@ -20,7 +20,7 @@ def get_member(db: Session, org_id: int, member_id: int) -> OrganizationMembers:
 
 def get_all_members(org_id: int, db: Session):
     query = text("""
-        SELECT users.email, roles.role_name
+        SELECT users.email, roles.role_name, organization_members.member_id
         FROM users
         JOIN organization_members ON users.id = organization_members.member_id
         JOIN roles ON organization_members.role_id = roles.id
@@ -29,9 +29,13 @@ def get_all_members(org_id: int, db: Session):
     result = db.execute(query, {"org_id": org_id})
     rows = result.fetchall()
     logger.info("Fetched %s members for organization %s", len(rows), org_id)
-    return [{"email": row.email, "role_name": row.role_name} for row in rows]
+    return [{"email": row.email, "role_name": row.role_name, "member_id": row.member_id} for row in rows]
+
+ASSIGNABLE_ROLES = {"coowner", "stakeholder"}
 
 def add_member(org_id: int, email: str, role_name: str, added_by: int, db: Session):
+    if role_name not in ASSIGNABLE_ROLES:
+        raise ValueError(f"Cannot assign role '{role_name}' through this form")
     user_row = db.execute(
         text("SELECT id FROM users WHERE email = :email"), {"email": email}
     ).fetchone()

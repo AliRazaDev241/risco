@@ -1,6 +1,6 @@
 """Pydantic schemas for API request and response validation"""
 
-from typing import Literal
+from typing import Literal, Optional
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from datetime import datetime, timezone
 
@@ -91,6 +91,12 @@ class OrgMemberResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class MemberListResponse(BaseModel):
+    email: str
+    role_name: str
+    member_id: int
+
+
 class ClientsCreate(BaseModel):
     """Validate input before insertion into clients table"""
 
@@ -98,7 +104,15 @@ class ClientsCreate(BaseModel):
     name: str
     email: str
     contact_number: str | None = None
-    reliability_score: int
+    reliability_score: Optional[int] = None
+
+
+class ClientsUpdate(BaseModel):
+    """ Validates input before updating clients Table """
+    name: str | None = None
+    email: str | None = None
+    contact_number: str | None = None
+    reliability_score: int | None = None
 
 class ClientsResponse(BaseModel):
     """Reads data from clients table"""
@@ -108,7 +122,6 @@ class ClientsResponse(BaseModel):
     name: str
     email: str
     contact_number: str | None
-    reliability_score: int
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -117,8 +130,17 @@ class RevenueCreate(BaseModel):
     client_name: str  # lookup by name instead of raw FK
     revenue_type: Literal["One_Time", "Recurring"]
     date_expected: datetime
-    date_received: datetime | None = None
-    amount: int = Field(gt=0)
+    amount: int
+
+
+    @field_validator("date_received")
+    @classmethod
+    def must_not_be_future(cls, v):
+        if v is None:
+            return v
+        if v > datetime.now(timezone.utc):
+            raise ValueError("date_received cannot be in the future")
+        return v
 
 class RevenueUpdate(BaseModel):
     """Validates input before updating Revenue Table"""

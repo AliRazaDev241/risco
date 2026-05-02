@@ -12,7 +12,7 @@ logger = get_logger(__name__)
 
 router = APIRouter(prefix="/organizations/{org_id}/members", tags=["Members & Roles"])
 
-@router.get("/")
+@router.get("/", response_model=list[schema.MemberListResponse])
 def list_members(org_id: int, db: Session = Depends(get_db)):
     try:
         return org_mem_service.get_all_members(org_id, db)
