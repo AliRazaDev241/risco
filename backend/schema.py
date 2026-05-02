@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-""" Pydantic schemas for API request and response validation """
-from pydantic import BaseModel, ConfigDict, Field
-from datetime import datetime
- 
-=======
 """Pydantic schemas for API request and response validation"""
 
 from typing import Literal, Optional
@@ -11,7 +5,6 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from datetime import datetime, timezone
 
 
->>>>>>> e1871f9 (updated operations page)
 class UserCreate(BaseModel):
     """ Validates input before insertion into Users Table """
     email: str
@@ -88,8 +81,6 @@ class OrgMemberResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-<<<<<<< HEAD
-=======
 
 class MemberListResponse(BaseModel):
     email: str
@@ -97,7 +88,6 @@ class MemberListResponse(BaseModel):
     member_id: int
 
 
->>>>>>> e1871f9 (updated operations page)
 class ClientsCreate(BaseModel):
     """ Validate input before insertion into clients table """
     organization_id: int
