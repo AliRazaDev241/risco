@@ -285,6 +285,32 @@
 
 # Financial Intelligence Page
 
+## GET /financial/intelligence
+- **Usage:** Fetch key financial metrics for the Financial Intelligence Page
+
+### Parameters
+| Name   | In    | Type    | Required |
+|--------|-------|---------|----------|
+| org_id | query | integer | Yes      |
+
+### Response Body
+```json
+{
+  "revenue_reliability_score": 0,
+  "revenue_concentration_risk": 0.5041322314049586,
+  "reliable_revenue": 0,
+  "total_revenue_expected": 220,
+  "actual_revenue": 220
+}
+```
+
+### Errors
+| Code | Description |
+|------|-------------|
+| 404  | Organization not found |
+| 500  | Failed to fetch Financial Metrics |
+
+
 ## GET /revenue/
 - **Usage:** List revenue entries (5 per page)
 
@@ -347,7 +373,11 @@
   "amount": 10000
 }
 ```
-
+### Errors
+| Code | Description |
+|------|-------------|
+| 404  | Organization not found |
+| 500  | Failed to Update Revenue |
 ---
 
 ## GET /expenses/
