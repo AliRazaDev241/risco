@@ -1,41 +1,10 @@
-// import Login from "./pages/login";
-
-// function App() {
-//   return <Login />;
-// }
-
-// export default App;
-
-// // import Register from "./pages/Register";
-
-// // function App() {
-// //   return <Register />;
-// // }
-
-// // export default App;
-
-// // import Dashboard from "./pages/Dashboard";
-
-// // function App() {
-// //   return <Dashboard />;
-// // }
-
-// // export default App;
-
-// // import OrgSelect  from "./pages/OrgSelect";
-
-// // function App() {
-// //   return <OrgSelect />;
-// // }
-
-// // export default App;
-
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Login from "./pages/login"
 import Register from "./pages/Register"
 import OrgSelect from "./pages/OrgSelect"
 import Dashboard from "./pages/Dashboard"
 import Operations from "./pages/Operations"
+import FinancialIntelligence from "./pages/FinancialIntelligence"
 
 function App() {
   return (
@@ -46,6 +15,7 @@ function App() {
         <Route path="/orgselect" element={<OrgSelect />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/operations" element={<Operations />} />
+        <Route path="/financial-intelligence" element={<FinancialIntelligence />} />
       </Routes>
     </BrowserRouter>
   )

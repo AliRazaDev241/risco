@@ -127,11 +127,11 @@ class ClientsResponse(BaseModel):
 
 class RevenueCreate(BaseModel):
     org_id: int
-    client_name: str  # lookup by name instead of raw FK
+    client_name: str
     revenue_type: Literal["One_Time", "Recurring"]
     date_expected: datetime
     date_received: datetime | None = None
-    amount: int
+    amount: int = Field(gt=0)
 
     @field_validator("date_received", mode="before")
     @classmethod
@@ -143,23 +143,12 @@ class RevenueCreate(BaseModel):
             v = dt.fromisoformat(v)
         if v.tzinfo is None:
             v = v.replace(tzinfo=timezone.utc)
-        if v > datetime.now(timezone.utc):
+        if v.date() > datetime.now(timezone.utc).date():
             raise ValueError("date_received cannot be in the future")
         return v
 
 class RevenueUpdate(BaseModel):
-    """Validates input before updating Revenue Table"""
-
     date_received: datetime | None = None
-    
-    @field_validator("date_received")
-    @classmethod
-    def must_not_be_future(cls, v):
-        if v is None:
-            return v
-        if v > datetime.now(timezone.utc):
-            raise ValueError("date_received cannot be in the future")
-        return v
 
 class IntelligenceResponse(BaseModel):
     revenue_reliability_score: float    # 0-100, weighted avg reliability of clients

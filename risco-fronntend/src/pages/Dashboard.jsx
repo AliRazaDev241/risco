@@ -286,11 +286,11 @@
 
 import { useState } from "react";
 import Operations from "./Operations"
+import FinancialIntelligence from "./FinancialIntelligence"
 
 const navItems = [
   { id: "overview", label: "Dashboard" },
-  { id: "expense", label: "Expense Intelligence" },
-  { id: "revenue", label: "Revenue Intelligence" },
+  { id: "finance", label: "Financial Intelligence" },
   { id: "operations", label: "Operations" },
 ];
 
@@ -356,22 +356,13 @@ export default function Dashboard() {
 
             {/* Section cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <button
-                onClick={() => setActive("expense")}
+               <button
+                onClick={() => setActive("finance")}
                 className="bg-white/70 backdrop-blur border border-teal-100 rounded-2xl p-6 text-left hover:border-teal-400 hover:shadow-md transition-all duration-300"
               >
                 <div className="text-2xl mb-3">📉</div>
-                <h3 className="text-base font-semibold text-[#1a3a32] mb-1">Expense Intelligence</h3>
-                <p className="text-xs text-gray-400">Burn rate · Ops cost · Risk alerts</p>
-              </button>
-
-              <button
-                onClick={() => setActive("revenue")}
-                className="bg-white/70 backdrop-blur border border-teal-100 rounded-2xl p-6 text-left hover:border-teal-400 hover:shadow-md transition-all duration-300"
-              >
-                <div className="text-2xl mb-3">📈</div>
-                <h3 className="text-base font-semibold text-[#1a3a32] mb-1">Revenue Intelligence</h3>
-                <p className="text-xs text-gray-400">MRR · Client dependency · Heatmap</p>
+                <h3 className="text-base font-semibold text-[#1a3a32] mb-1">Financial Intelligence</h3>
+                <p className="text-xs text-gray-400">Revenue · Reliability · Risk analysis</p>
               </button>
 
               <button
@@ -392,35 +383,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {active === "expense" && (
-          <div>
-            <h2 className="text-2xl font-bold text-[#1a3a32] mb-1">Expense Intelligence</h2>
-            <p className="text-gray-400 text-sm mb-8">Monitor and manage your spending.</p>
-            <div className="bg-white/70 backdrop-blur border border-teal-100 rounded-2xl p-6 text-gray-400 text-sm shadow-sm">
-              Coming soon — expense charts and entries will go here.
-            </div>
-          </div>
-        )}
-
-        {active === "revenue" && (
-          <div>
-            <h2 className="text-2xl font-bold text-[#1a3a32] mb-1">Revenue Intelligence</h2>
-            <p className="text-gray-400 text-sm mb-8">Track MRR, clients and revenue health.</p>
-            <div className="bg-white/70 backdrop-blur border border-teal-100 rounded-2xl p-6 text-gray-400 text-sm shadow-sm">
-              Coming soon — revenue charts and entries will go here.
-            </div>
-          </div>
-        )}
-
-        {/* {active === "operations" && (
-          <div>
-            <h2 className="text-2xl font-bold text-[#1a3a32] mb-1">Operations</h2>
-            <p className="text-gray-400 text-sm mb-8">Manage your team, clients and entries.</p>
-            <div className="bg-white/70 backdrop-blur border border-teal-100 rounded-2xl p-6 text-gray-400 text-sm shadow-sm">
-              Coming soon — operations panels will go here.
-            </div>
-          </div>
-        )} */}
+        {active === "finance" && <FinancialIntelligence />}
 
         {active === "operations" && (
           <div>

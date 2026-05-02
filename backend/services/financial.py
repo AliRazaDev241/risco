@@ -37,7 +37,7 @@ def get_intelligence_metrics(org_id: int, db: Session):
     """), {"org_id": org_id, "month": month, "year": year}).scalar()
 
     amounts = [row.amount for row in client_revenue]
-    scores = [row.reliability_score for row in client_revenue]
+    scores = [row.reliability_score if row.reliability_score is not None else 0 for row in client_revenue]
 
     return {
         "revenue_reliability_score": calculations.revenue_reliability_score(amounts, scores),
