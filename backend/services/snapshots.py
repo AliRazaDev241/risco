@@ -90,8 +90,8 @@ def _upsert_best(db: Session, org_id: int):
         SELECT NVL(SUM(amount), 0) FROM expenses
         WHERE organization_id = :org_id
         AND urgency = 'Non-Critical'
-        AND EXTRACT(MONTH FROM date) = :month
-        AND EXTRACT(YEAR FROM date) = :year
+        AND EXTRACT(MONTH FROM "date") = :month
+        AND EXTRACT(YEAR FROM "date") = :year
     """), {"org_id": org_id, "month": month, "year": year}).scalar()
 
     amounts = [row.amount for row in expected_amounts]
@@ -112,10 +112,11 @@ def _upsert_worst(db: Session, org_id: int):
     all_expenses = db.execute(text("""
         SELECT NVL(SUM(amount), 0) FROM expenses
         WHERE organization_id = :org_id
-        AND EXTRACT(MONTH FROM date) = :month
-        AND EXTRACT(YEAR FROM date) = :year
+        AND EXTRACT(MONTH FROM "date") = :month
+        AND EXTRACT(YEAR FROM "date") = :year
     """), {"org_id": org_id, "month": month, "year": year}).scalar()
 
     amounts = [row.amount for row in client_revenue]
-    scores = [row.reliability_score for row in client_revenue]
+    # scores = [row.reliability_score for row in client_revenue]
+    scores = [row.reliability_score if row.reliability_score is not None else 0 for row in client_revenue]
     _upsert_snapshot(db, org_id, "Worst", reliable_revenue(amounts, scores), all_expenses)

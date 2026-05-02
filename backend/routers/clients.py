@@ -20,6 +20,8 @@ def add_client(client: schema.ClientsCreate, db: Session = Depends(get_db)):
         if "SYS_C008330" in err:
             raise HTTPException(status_code=409, detail="Client with this email already exists")
         elif "SYS_C008331" in err:
+            raise HTTPException(status_code=409, detail="Client with this contact number already exists")
+        elif "SYS_C008332" in err:
             raise HTTPException(status_code=404, detail="Organization not found")
         else:
             raise HTTPException(status_code=409, detail="Database constraint violated")

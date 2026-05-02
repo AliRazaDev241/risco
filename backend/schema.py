@@ -133,7 +133,6 @@ class RevenueCreate(BaseModel):
     date_received: datetime | None = None
     amount: int
 
-
     @field_validator("date_received", mode="before")
     @classmethod
     def must_not_be_future(cls, v):
@@ -143,8 +142,8 @@ class RevenueCreate(BaseModel):
             from datetime import datetime as dt
             v = dt.fromisoformat(v)
         if v.tzinfo is None:
-            from datetime import timezone
-            v = v.replace(tzinfo=timezone.utc)
+            import pytz
+            v = v.replace(tzinfo=pytz.utc)
         if v > datetime.now(timezone.utc):
             raise ValueError("date_received cannot be in the future")
         return v
