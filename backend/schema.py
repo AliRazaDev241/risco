@@ -130,14 +130,21 @@ class RevenueCreate(BaseModel):
     client_name: str  # lookup by name instead of raw FK
     revenue_type: Literal["One_Time", "Recurring"]
     date_expected: datetime
+    date_received: datetime | None = None
     amount: int
 
 
-    @field_validator("date_received")
+    @field_validator("date_received", mode="before")
     @classmethod
     def must_not_be_future(cls, v):
         if v is None:
             return v
+        if isinstance(v, str):
+            from datetime import datetime as dt
+            v = dt.fromisoformat(v)
+        if v.tzinfo is None:
+            from datetime import timezone
+            v = v.replace(tzinfo=timezone.utc)
         if v > datetime.now(timezone.utc):
             raise ValueError("date_received cannot be in the future")
         return v
