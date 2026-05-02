@@ -142,8 +142,7 @@ class RevenueCreate(BaseModel):
             from datetime import datetime as dt
             v = dt.fromisoformat(v)
         if v.tzinfo is None:
-            import pytz
-            v = v.replace(tzinfo=pytz.utc)
+            v = v.replace(tzinfo=timezone.utc)
         if v > datetime.now(timezone.utc):
             raise ValueError("date_received cannot be in the future")
         return v
