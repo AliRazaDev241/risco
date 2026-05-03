@@ -1,4 +1,5 @@
 """API endpoints for Revenue"""
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db import get_db
@@ -12,6 +13,7 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/revenue", tags=["Revenue"])
 DbSession: TypeAlias = Annotated[Session, Depends(get_db)]
 
+
 @router.post(
     "/",
     response_model=schema.RevenueResponse,
@@ -20,7 +22,7 @@ DbSession: TypeAlias = Annotated[Session, Depends(get_db)]
         404: {"description": "Client not found"},
         422: {"description": "Amount must be greater than 0"},
         500: {"description": "Failed to add revenue"},
-    }
+    },
 )
 def add_revenue(revenue: schema.RevenueCreate, db: DbSession):
     try:
@@ -33,13 +35,14 @@ def add_revenue(revenue: schema.RevenueCreate, db: DbSession):
         logger.error("Failed to add revenue: %s", e)
         raise HTTPException(status_code=500, detail="Failed to add revenue")
 
+
 @router.get(
     "/",
     response_model=schema.RevenuePage,
     responses={
         404: {"description": "Organization not found"},
         500: {"description": "Failed to fetch revenue"},
-    }
+    },
 )
 def list_revenue(org_id: int, revenue_type: str, page_no: int, db: DbSession):
     try:
@@ -50,13 +53,14 @@ def list_revenue(org_id: int, revenue_type: str, page_no: int, db: DbSession):
         logger.error("Failed to fetch revenue for org %s", org_id)
         raise HTTPException(status_code=500, detail="Failed to fetch revenue")
 
+
 @router.patch(
     "/{revenue_id}",
     response_model=schema.RevenueResponse,
     responses={
         404: {"description": "Revenue not found"},
         500: {"description": "Failed to update revenue"},
-    }
+    },
 )
 def update_revenue(revenue_id: int, revenue: schema.RevenueUpdate, db: DbSession):
     try:

@@ -1,4 +1,5 @@
 """API endpoints for Members & Roles"""
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db import get_db
@@ -11,10 +12,11 @@ logger = get_logger(__name__)
 DbSession: TypeAlias = Annotated[Session, Depends(get_db)]
 router = APIRouter(prefix="/organizations/{org_id}/members", tags=["Members & Roles"])
 
+
 @router.get(
     "/",
     response_model=list[schema.MemberListResponse],
-    responses={500: {"description": "Failed to fetch members"}}
+    responses={500: {"description": "Failed to fetch members"}},
 )
 def list_members(org_id: int, db: DbSession):
     try:
@@ -23,6 +25,7 @@ def list_members(org_id: int, db: DbSession):
         logger.error("Failed to fetch members for org %s", org_id)
         raise HTTPException(status_code=500, detail="Failed to fetch members")
 
+
 @router.post(
     "/",
     status_code=201,
@@ -30,11 +33,13 @@ def list_members(org_id: int, db: DbSession):
         404: {"description": "User not found"},
         409: {"description": "Member is already part of the organization"},
         500: {"description": "Failed to add member"},
-    }
+    },
 )
 def add_member(org_id: int, data: schema.AddMemberRequest, db: DbSession):
     try:
-        return org_mem_service.add_member(org_id, data.email, data.role_name, data.added_by, db)
+        return org_mem_service.add_member(
+            org_id, data.email, data.role_name, data.added_by, db
+        )
     except LookupError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except ValueError as e:
@@ -43,13 +48,14 @@ def add_member(org_id: int, data: schema.AddMemberRequest, db: DbSession):
         logger.error("Failed to add member to org %s", org_id)
         raise HTTPException(status_code=500, detail="Failed to add member")
 
+
 @router.delete(
     "/{member_id}",
     status_code=200,
     responses={
         404: {"description": "Member is not part of the organization"},
         500: {"description": "Failed to remove member"},
-    }
+    },
 )
 def remove_member(org_id: int, member_id: int, db: DbSession):
     try:

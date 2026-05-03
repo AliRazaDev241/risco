@@ -1,4 +1,5 @@
 """API endpoints for Financial Snapshots"""
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db import get_db
@@ -11,13 +12,14 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/snapshots", tags=["Snapshots"])
 DbSession: TypeAlias = Annotated[Session, Depends(get_db)]
 
+
 @router.post(
     "/graph",
     response_model=schema.GraphResponse,
     responses={
         404: {"description": "Organization not found"},
         500: {"description": "Failed to fetch Graph Data"},
-    }
+    },
 )
 def get_graph(snapshot: schema.GraphRequest, db: DbSession):
     try:

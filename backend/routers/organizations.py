@@ -1,4 +1,5 @@
 """API endpoints for Organizations"""
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db import get_db
@@ -11,10 +12,11 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/organizations", tags=["Organizations"])
 DbSession: TypeAlias = Annotated[Session, Depends(get_db)]
 
+
 @router.get(
     "/user/{user_id}",
     response_model=schema.OrganizationResponse,
-    responses={404: {"description": "No organization found"}}
+    responses={404: {"description": "No organization found"}},
 )
 def get_user_organization(user_id: int, db: DbSession):
     member = org_service.check_membership_by_user(user_id, db)
@@ -22,10 +24,11 @@ def get_user_organization(user_id: int, db: DbSession):
         raise HTTPException(status_code=404, detail="No organization found")
     return org_service.get_organization_by_id(member.organization_id, db)
 
+
 @router.post(
     "/",
     response_model=schema.OrganizationResponse,
-    responses={400: {"description": "Organization name already taken"}}
+    responses={400: {"description": "Organization name already taken"}},
 )
 def create_organization(org: schema.OrganizationCreate, creator_id: int, db: DbSession):
     existing = org_service.get_organization_by_name(org.org_name, db)
@@ -33,13 +36,14 @@ def create_organization(org: schema.OrganizationCreate, creator_id: int, db: DbS
         raise HTTPException(status_code=400, detail="Organization name already taken")
     return org_service.create_organization(org, creator_id, db)
 
+
 @router.post(
     "/join",
     response_model=schema.OrganizationResponse,
     responses={
         404: {"description": "Organization does not exist"},
         403: {"description": "User has not been added to this organization"},
-    }
+    },
 )
 def join_organization(request: schema.OrganizationJoinRequest, db: DbSession):
     org = org_service.get_organization_by_name(request.org_name, db)

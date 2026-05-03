@@ -38,7 +38,9 @@ def test_hash_password_is_not_plaintext():
 
 
 def test_hash_password_different_hashes_same_input():
-    assert user_service.hash_password("mypassword") != user_service.hash_password("mypassword")
+    assert user_service.hash_password("mypassword") != user_service.hash_password(
+        "mypassword"
+    )
 
 
 # ── verify_password ──────────────────────────────────────────────────────────
@@ -59,7 +61,10 @@ def test_verify_password_wrong():
 
 def test_get_user_by_email_found(mock_db, sample_user):
     mock_db.query().filter().first.return_value = sample_user
-    assert user_service.get_user_by_email("ali@risco.com", mock_db).email == "ali@risco.com"
+    assert (
+        user_service.get_user_by_email("ali@risco.com", mock_db).email
+        == "ali@risco.com"
+    )
 
 
 def test_get_user_by_email_not_found(mock_db):
@@ -128,7 +133,10 @@ def test_authenticate_user_success(mock_db, sample_user):
     real_hash = user_service.hash_password("secure123")
     sample_user.password_hash = real_hash
     mock_db.query().filter().first.return_value = sample_user
-    assert user_service.authenticate_user("ali@risco.com", "secure123", mock_db) is not None
+    assert (
+        user_service.authenticate_user("ali@risco.com", "secure123", mock_db)
+        is not None
+    )
 
 
 def test_authenticate_user_wrong_password(mock_db, sample_user):

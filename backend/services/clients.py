@@ -23,7 +23,6 @@ def add_client(client: schema.ClientsCreate, db: Session):
         logger.info("Client %s added to org %s", client.name, client.organization_id)
         return new_client
     except Exception:
-    except Exception:
         db.rollback()
         raise
 
