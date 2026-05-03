@@ -87,7 +87,7 @@ def add_member(org_id: int, email: str, role_name: str, added_by: int, db: Sessi
             added_by,
         )
         return {"detail": f"{email} added successfully as {role_name}"}
-    except Exception as e:
+    except Exception:
         db.rollback()
         raise
 

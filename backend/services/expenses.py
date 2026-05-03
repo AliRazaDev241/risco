@@ -29,7 +29,7 @@ def add_expense(expense: schema.ExpenseCreate, db: Session):
         db.refresh(new_expense)
         logger.info("Expense added for org %s", expense.organization_id)
         return new_expense
-    except Exception as e:
+    except Exception:
         db.rollback()
         raise
 

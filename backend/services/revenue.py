@@ -34,7 +34,7 @@ def add_revenue(revenue: schema.RevenueCreate, db: Session):
         db.refresh(new_revenue)
         logger.info("Revenue added for client %s", revenue.client_name)
         return new_revenue
-    except Exception as e:
+    except Exception:
         db.rollback()
         raise
 

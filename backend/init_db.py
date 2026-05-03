@@ -1,5 +1,5 @@
 from db import engine, Base
-from models import *  # make sure all models are imported
+import models
 from logger import get_logger
 
 logger = get_logger(__name__)
