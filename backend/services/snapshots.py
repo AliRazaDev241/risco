@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, extract, text
 from models import Revenue, Expenses, Clients, FinancialSnapshots
 import schema
-from services.calculations import revenue_concentration_risk, reliable_revenue
+import calculations
 from logger import get_logger
 
 logger = get_logger(__name__)
@@ -151,7 +151,7 @@ def _upsert_worst(db: Session, org_id: int):
         for row in client_revenue
     ]
     _upsert_snapshot(
-        db, org_id, "Worst", reliable_revenue(amounts, scores), all_expenses
+        db, org_id, "Worst", calculations.reliable_revenue(amounts, scores), all_expenses
     )
 
 
