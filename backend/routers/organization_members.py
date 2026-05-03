@@ -12,6 +12,7 @@ logger = get_logger(__name__)
 
 router = APIRouter(prefix="/organizations/{org_id}/members", tags=["Members & Roles"])
 
+
 @router.get("/", response_model=list[schema.MemberListResponse])
 def list_members(org_id: int, db: Session = Depends(get_db)):
     try:
@@ -20,10 +21,15 @@ def list_members(org_id: int, db: Session = Depends(get_db)):
         logger.error("Failed to fetch members for org %s: %s", org_id, e)
         raise HTTPException(status_code=500, detail="Failed to fetch members")
 
+
 @router.post("/", status_code=201)
-def add_member(org_id: int, data: schema.AddMemberRequest, db: Session = Depends(get_db)):
+def add_member(
+    org_id: int, data: schema.AddMemberRequest, db: Session = Depends(get_db)
+):
     try:
-        return org_mem_service.add_member(org_id, data.email, data.role_name, data.added_by, db)
+        return org_mem_service.add_member(
+            org_id, data.email, data.role_name, data.added_by, db
+        )
     except LookupError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except ValueError as e:
@@ -31,6 +37,7 @@ def add_member(org_id: int, data: schema.AddMemberRequest, db: Session = Depends
     except Exception as e:
         logger.error("Failed to add member to org %s: %s", org_id, e)
         raise HTTPException(status_code=500, detail="Failed to add member")
+
 
 @router.delete("/{member_id}", status_code=200)
 def remove_member(org_id: int, member_id: int, db: Session = Depends(get_db)):

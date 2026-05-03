@@ -5,7 +5,6 @@ from unittest.mock import MagicMock
 from services import clients as client_service
 import schema
 
-
 # ── Fixtures ────────────────────────────────────────────────────────────────
 
 

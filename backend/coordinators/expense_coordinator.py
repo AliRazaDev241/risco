@@ -1,4 +1,5 @@
 """Orchestrates expense writes and snapshot refresh"""
+
 from sqlalchemy.orm import Session
 from services import expenses as expense_service
 from services import snapshots as snapshot_service

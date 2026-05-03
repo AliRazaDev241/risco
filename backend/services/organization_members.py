@@ -5,6 +5,7 @@ from models import OrganizationMembers
 
 logger = get_logger(__name__)
 
+
 def get_member(db: Session, org_id: int, member_id: int) -> OrganizationMembers:
     member = (
         db.query(OrganizationMembers)
@@ -18,6 +19,7 @@ def get_member(db: Session, org_id: int, member_id: int) -> OrganizationMembers:
         raise LookupError(f"Member {member_id} not found in organization {org_id}")
     return member
 
+
 def get_all_members(org_id: int, db: Session):
     query = text("""
         SELECT users.email, roles.role_name, organization_members.member_id
@@ -29,9 +31,14 @@ def get_all_members(org_id: int, db: Session):
     result = db.execute(query, {"org_id": org_id})
     rows = result.fetchall()
     logger.info("Fetched %s members for organization %s", len(rows), org_id)
-    return [{"email": row.email, "role_name": row.role_name, "member_id": row.member_id} for row in rows]
+    return [
+        {"email": row.email, "role_name": row.role_name, "member_id": row.member_id}
+        for row in rows
+    ]
+
 
 ASSIGNABLE_ROLES = {"coowner", "stakeholder"}
+
 
 def add_member(org_id: int, email: str, role_name: str, added_by: int, db: Session):
     if role_name not in ASSIGNABLE_ROLES:
@@ -44,7 +51,8 @@ def add_member(org_id: int, email: str, role_name: str, added_by: int, db: Sessi
     member_id = user_row.id
 
     role_row = db.execute(
-        text("SELECT id FROM roles WHERE role_name = :role_name"), {"role_name": role_name}
+        text("SELECT id FROM roles WHERE role_name = :role_name"),
+        {"role_name": role_name},
     ).fetchone()
     if not role_row:
         raise LookupError(f"No role found with name {role_name}")
@@ -71,11 +79,18 @@ def add_member(org_id: int, email: str, role_name: str, added_by: int, db: Sessi
         db.add(member)
         db.commit()
         db.refresh(member)
-        logger.info("Member %s added to org %s with role %s by user %s", email, org_id, role_name, added_by)
+        logger.info(
+            "Member %s added to org %s with role %s by user %s",
+            email,
+            org_id,
+            role_name,
+            added_by,
+        )
         return {"detail": f"{email} added successfully as {role_name}"}
     except Exception as e:
         db.rollback()
         raise
+
 
 def remove_member(db: Session, org_id: int, member_id: int) -> dict:
     member = get_member(db, org_id, member_id)

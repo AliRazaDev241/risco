@@ -39,9 +39,7 @@ def check_membership(user_id: int, org_id: int, db: Session):
     )
 
 
-def create_organization(
-    org: schema.OrganizationCreate, creator_id: int, db: Session
-):
+def create_organization(org: schema.OrganizationCreate, creator_id: int, db: Session):
     """Creates organization and adds creator as first member"""
     try:
         new_org = Organization(org_name=org.org_name)

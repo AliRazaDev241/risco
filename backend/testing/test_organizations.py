@@ -5,7 +5,6 @@ from unittest.mock import MagicMock, patch
 from services import organizations as org_service
 import schema
 
-
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 
 

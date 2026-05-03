@@ -1,19 +1,22 @@
 """Business logic for Revenue"""
+
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from models import Revenue
 import schema
 from logger import get_logger
+
 logger = get_logger(__name__)
+
 
 def add_revenue(revenue: schema.RevenueCreate, db: Session):
     client_row = db.execute(
-    text("""
+        text("""
         SELECT clients.id FROM clients 
         WHERE clients.name = :name 
         AND clients.organization_id = :org_id
     """),
-    {"name": revenue.client_name, "org_id": revenue.org_id}
+        {"name": revenue.client_name, "org_id": revenue.org_id},
     ).fetchone()
     if not client_row:
         raise LookupError(f"No client found with name {revenue.client_name}")
@@ -34,25 +37,32 @@ def add_revenue(revenue: schema.RevenueCreate, db: Session):
     except Exception as e:
         db.rollback()
         raise
-    
+
+
 def list_five_revenue(org_id: int, revenue_type: str, page_no: int, db: Session):
-    org = db.execute(text("SELECT id FROM organizations WHERE id = :org_id"), {"org_id": org_id}).fetchone()
+    org = db.execute(
+        text("SELECT id FROM organizations WHERE id = :org_id"), {"org_id": org_id}
+    ).fetchone()
     if not org:
         raise LookupError(f"No organization found with id {org_id}")
 
     params = {"org_id": org_id, "revenue_type": revenue_type}
 
-    count = db.execute(text("""
+    count = db.execute(
+        text("""
         SELECT COUNT(*) FROM revenue
         JOIN clients ON clients.id = revenue.client_id
         WHERE clients.organization_id = :org_id
         AND revenue.revenue_type = :revenue_type
-    """), params).scalar()
+    """),
+        params,
+    ).scalar()
 
     total_pages = max(1, -(-count // 5))  # ceiling division
 
     offset = (page_no - 1) * 5
-    rows = db.execute(text("""
+    rows = db.execute(
+        text("""
         SELECT revenue.id, clients.name AS client_name, clients.email AS client_email,
             revenue.date_expected, revenue.date_received, revenue.amount
         FROM revenue
@@ -62,9 +72,12 @@ def list_five_revenue(org_id: int, revenue_type: str, page_no: int, db: Session)
         AND revenue.revenue_type = :revenue_type
         ORDER BY revenue.date_expected ASC, revenue.id ASC
         OFFSET :offset ROWS FETCH NEXT 5 ROWS ONLY
-    """), {**params, "offset": offset}).fetchall()
+    """),
+        {**params, "offset": offset},
+    ).fetchall()
 
     return {"items": rows, "total_pages": total_pages, "current_page": page_no}
+
 
 def update_revenue(revenue_id: int, data: schema.RevenueUpdate, db: Session):
     row = db.get(Revenue, revenue_id)
