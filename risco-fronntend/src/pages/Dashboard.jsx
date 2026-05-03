@@ -209,7 +209,6 @@ function SnapshotGraph({ orgId, active }) {
       </div>
 
       {/* Controls */}
-      {/* Controls */}
       <div className="flex items-end justify-between gap-4 px-6 py-4 bg-[#fafffe] border-b border-teal-50">
 
         {/* Left — Metric + Date stacked */}
@@ -369,7 +368,12 @@ export default function Dashboard() {
           </nav>
         </div>
 
-        <button className="w-full text-left px-3 py-2.5 rounded-lg text-sm text-red-400 hover:bg-red-50 hover:text-red-500 transition-all duration-200">
+        <button
+          onClick={() => {
+            localStorage.clear()
+            window.location.href = "/"
+          }}
+          className="w-full text-left px-3 py-2.5 rounded-lg text-sm text-red-400 hover:bg-red-50 hover:text-red-500 transition-all duration-200">
           Logout
         </button>
       </aside>

@@ -5,6 +5,7 @@ export default function Login() {
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [showForgotModal, setShowForgotModal] = useState(false)
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -29,6 +30,8 @@ export default function Login() {
         // Check if user already has an org
         const orgResponse = await fetch(`http://127.0.0.1:8000/organizations/user/${data.id}`)
         if (orgResponse.ok) {
+          const orgData = await orgResponse.json()
+          localStorage.setItem("org_id", orgData.id)  // ← add this
           // User has an org, go to dashboard
           window.location.href = "/dashboard"
         } else {
@@ -36,7 +39,11 @@ export default function Login() {
           window.location.href = "/orgselect"
         }
       } else {
-        setError(data.detail || "Invalid email or password")
+        if (Array.isArray(data.detail)) {
+          setError(data.detail[0]?.msg || "Validation error")
+        } else {
+          setError(data.detail || "Invalid email or password")
+        }
       }
     } catch (err) {
       setError("Could not connect to server. Is the backend running?")
@@ -104,7 +111,7 @@ export default function Login() {
               <input type="checkbox" className="accent-teal-600" />
               Remember me
             </label>
-            <a href="#" className="hover:text-teal-700 transition-colors">
+            <a onClick={() => setShowForgotModal(true)} className="hover:text-teal-700 transition-colors cursor-pointer">
               Forgot password?
             </a>
           </div>
@@ -128,6 +135,28 @@ export default function Login() {
         <div className="mt-6 text-center text-xs text-gray-400">
           🔒 Protected with 256-bit encryption
         </div>
+
+        {showForgotModal && (
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 shadow-xl border border-teal-100">
+              <div className="text-center mb-4">
+                <div className="w-12 h-12 bg-teal-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span className="text-2xl">🔐</span>
+                </div>
+                <h3 className="text-base font-bold text-[#1a3a32]">Forgot Password?</h3>
+                <p className="text-xs text-gray-400 mt-2">
+                  Password reset is managed by your organization admin. Please contact them to reset your password.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowForgotModal(false)}
+                className="w-full py-2.5 rounded-lg bg-teal-700 text-white text-sm font-medium hover:bg-teal-600 transition-all">
+                Got it
+              </button>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   )
