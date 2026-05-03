@@ -1,5 +1,4 @@
 """API endpoints for Revenue"""
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db import get_db
@@ -10,11 +9,19 @@ from logger import get_logger
 from typing import Annotated, TypeAlias
 
 logger = get_logger(__name__)
-
 router = APIRouter(prefix="/revenue", tags=["Revenue"])
 DbSession: TypeAlias = Annotated[Session, Depends(get_db)]
 
-@router.post("/", response_model=schema.RevenueResponse, status_code=201)
+@router.post(
+    "/",
+    response_model=schema.RevenueResponse,
+    status_code=201,
+    responses={
+        404: {"description": "Client not found"},
+        422: {"description": "Amount must be greater than 0"},
+        500: {"description": "Failed to add revenue"},
+    }
+)
 def add_revenue(revenue: schema.RevenueCreate, db: DbSession):
     try:
         return revenue_coordinator.add_revenue(revenue, db)
@@ -26,30 +33,38 @@ def add_revenue(revenue: schema.RevenueCreate, db: DbSession):
         logger.error("Failed to add revenue: %s", e)
         raise HTTPException(status_code=500, detail="Failed to add revenue")
 
-
-@router.get("/", response_model=schema.RevenuePage)
-def list_revenue(
-    org_id: int, revenue_type: str, page_no: int, db: DbSession
-):
+@router.get(
+    "/",
+    response_model=schema.RevenuePage,
+    responses={
+        404: {"description": "Organization not found"},
+        500: {"description": "Failed to fetch revenue"},
+    }
+)
+def list_revenue(org_id: int, revenue_type: str, page_no: int, db: DbSession):
     try:
         return revenue_service.list_five_revenue(org_id, revenue_type, page_no, db)
     except LookupError as e:
         raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        logger.error("Failed to fetch revenue for org %s: %s", org_id, e)
+    except Exception:
+        logger.error("Failed to fetch revenue for org %s", org_id)
         raise HTTPException(status_code=500, detail="Failed to fetch revenue")
 
-
-@router.patch("/{revenue_id}", response_model=schema.RevenueResponse)
-def update_revenue(
-    revenue_id: int, revenue: schema.RevenueUpdate, db: DbSession
-):
+@router.patch(
+    "/{revenue_id}",
+    response_model=schema.RevenueResponse,
+    responses={
+        404: {"description": "Revenue not found"},
+        500: {"description": "Failed to update revenue"},
+    }
+)
+def update_revenue(revenue_id: int, revenue: schema.RevenueUpdate, db: DbSession):
     try:
         updated = revenue_coordinator.update_revenue(revenue_id, revenue, db)
         logger.info("Revenue %s updated successfully", revenue_id)
         return updated
     except LookupError as e:
         raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        logger.error("Failed to update revenue %s: %s", revenue_id, e)
+    except Exception:
+        logger.error("Failed to update revenue %s", revenue_id)
         raise HTTPException(status_code=500, detail="Failed to update revenue")
