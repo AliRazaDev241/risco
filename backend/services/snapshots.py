@@ -18,6 +18,14 @@ def get_graph(snapshot: schema.GraphRequest, db):
     if not org:
         raise LookupError(f"No organization found with id {snapshot.org_id}")
 
+    date_range = db.query(
+        func.min(FinancialSnapshots.snapshot_date),
+        func.max(FinancialSnapshots.snapshot_date)
+    ).filter(
+        FinancialSnapshots.organization_id == snapshot.org_id,
+        FinancialSnapshots.snapshot_type == snapshot.snapshot_type,
+    ).one()
+
     rows = (
         db.query(FinancialSnapshots)
         .filter(
@@ -30,10 +38,15 @@ def get_graph(snapshot: schema.GraphRequest, db):
         .all()
     )
 
-    return [
-        {"snapshot_date": row.snapshot_date, "value": getattr(row, snapshot.metric_type)}
-        for row in rows
-    ]
+    return {
+        "date_range_start": date_range[0],
+        "date_range_end": date_range[1],
+        "data": [
+            {"snapshot_date": row.snapshot_date, "value": getattr(row, snapshot.metric_type)}
+            for row in rows
+        ]
+    }
+
 
 def refresh_or_create(db: Session, org_id: int):
     _upsert_base(db, org_id)

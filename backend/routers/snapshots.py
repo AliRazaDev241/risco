@@ -10,7 +10,7 @@ from datetime import datetime
 logger = get_logger(__name__)
 router = APIRouter(prefix="/snapshots", tags=["Snapshots"])
 
-@router.post("/graph", response_model=list[schema.GraphResponse])
+@router.post("/graph", response_model=schema.GraphResponse)
 def get_graph(snapshot: schema.GraphRequest, db: Session = Depends(get_db)):
     try:
         return snapshot_service.get_graph(snapshot, db)

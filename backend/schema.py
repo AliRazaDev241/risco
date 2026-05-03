@@ -262,5 +262,10 @@ class GraphRequest(BaseModel):
     end_date: datetime
 
 class GraphResponse(BaseModel):
+    date_range_start: datetime
+    date_range_end: datetime
+    data: list[GraphDataPoint]
+
+class GraphDataPoint(BaseModel):
     snapshot_date: datetime
     value: int

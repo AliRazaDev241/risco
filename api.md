@@ -521,13 +521,21 @@
 
 ### Response Body
 ```json
-[
-  {
-    "snapshot_date": "2026-05-03T10:55:55.064Z",
-    "value": 0
-  }
-]
+{
+  "date_range_start": "2026-01-01T00:00:00.000Z",
+  "date_range_end": "2026-05-03T00:00:00.000Z",
+  "data": [
+    {
+      "snapshot_date": "2026-05-03T10:55:55.064Z",
+      "value": 0
+    }
+  ]
+}
 ```
+### Notes
+- `date_range_start`: earliest snapshot date in the database for this org and snapshot type
+- `date_range_end`: latest snapshot date in the database for this org and snapshot type
+- `data`: filtered results within the requested `start_date` and `end_date`
 
 ### Errors
 | Code | Description              |
