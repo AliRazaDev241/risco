@@ -495,6 +495,46 @@
 | 404  | Organization not found |
 | 500  | Failed to fetch Dashboard Metrics |
  
+
+## POST /financial/graph
+- **Usage:** Fetches time-series snapshot data for rendering a graph
+
+### Request Body
+```json
+{
+  "org_id": 0,
+  "snapshot_type": "Base",
+  "metric_type": "cash_balance",
+  "start_date": "2026-05-03T10:55:55.060Z",
+  "end_date": "2026-05-03T10:55:55.060Z"
+}
+```
+
+### Request Fields
+| Field         | Type    | Required | Allowed Values                              |
+|---------------|---------|----------|---------------------------------------------|
+| org_id        | integer | Yes      | —                                           |
+| snapshot_type | string  | Yes      | `Base`, `Best`, `Worst`                     |
+| metric_type   | string  | Yes      | `cash_balance`, `monthly_revenue`, `monthly_expense` |
+| start_date    | datetime| Yes      | ISO 8601                                    |
+| end_date      | datetime| Yes      | ISO 8601                                    |
+
+### Response Body
+```json
+[
+  {
+    "snapshot_date": "2026-05-03T10:55:55.064Z",
+    "value": 0
+  }
+]
+```
+
+### Errors
+| Code | Description              |
+|------|--------------------------|
+| 404  | Organization not found   |
+| 500  | Failed to fetch graph data |
+
 ---
  
 # Clients Page
