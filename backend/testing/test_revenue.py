@@ -1,7 +1,7 @@
 """Test cases for services/revenue.py"""
 
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from datetime import datetime, timezone
 from services import revenue as revenue_service
 import schema
@@ -58,7 +58,7 @@ def test_add_revenue_success(mock_db, sample_revenue_create):
 def test_add_revenue_client_not_found_raises(mock_db, sample_revenue_create):
     mock_db.execute.return_value.fetchone.return_value = None
 
-    with pytest.raises(LookupError, match="No client 'Acme Corp' found"):
+    with pytest.raises(LookupError, match="No client found with name Acme Corp"):
         revenue_service.add_revenue(sample_revenue_create, mock_db)
 
 
@@ -88,7 +88,6 @@ def test_list_five_revenue_success(mock_db):
     row1.date_received = None
     row1.amount = 5000
 
-    # execute() called 3 times: org check, count, rows
     mock_db.execute.return_value.fetchone.side_effect = [org_row]
     mock_db.execute.return_value.scalar.return_value = 1
     mock_db.execute.return_value.fetchall.return_value = [row1]
@@ -122,13 +121,13 @@ def test_list_five_revenue_empty_returns_empty_list(mock_db):
     )
 
     assert result["items"] == []
-    assert result["total_pages"] == 1  # max(1, ...) ensures minimum of 1
+    assert result["total_pages"] == 1
 
 
 def test_list_five_revenue_pagination(mock_db):
     org_row = MagicMock()
     mock_db.execute.return_value.fetchone.side_effect = [org_row]
-    mock_db.execute.return_value.scalar.return_value = 12  # 12 records = 3 pages
+    mock_db.execute.return_value.scalar.return_value = 12
     mock_db.execute.return_value.fetchall.return_value = []
 
     result = revenue_service.list_five_revenue(
@@ -176,6 +175,5 @@ def test_update_revenue_none_date_received_not_updated(mock_db, sample_revenue):
 
     revenue_service.update_revenue(1, data, mock_db)
 
-    # date_received should remain unchanged
     assert sample_revenue.date_received == original_date
     mock_db.commit.assert_called_once()
