@@ -3,20 +3,37 @@ from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from sqlalchemy import func, extract, text
 from models import Revenue, Expenses, Clients, FinancialSnapshots
+import schema
 from services.calculations import revenue_concentration_risk, reliable_revenue
 from logger import get_logger
 
+
 logger = get_logger(__name__)
 
-def get_range(org_id: int, start_date: datetime, end_date: datetime, db: Session):
-    org = db.execute(text("SELECT id FROM organizations WHERE id = :org_id"), {"org_id": org_id}).fetchone()
+def get_graph(snapshot: schema.GraphRequest, db):
+    org = db.execute(
+        text("SELECT id FROM organizations WHERE id = :org_id"),
+        {"org_id": snapshot.org_id}
+    ).fetchone()
     if not org:
-        raise LookupError(f"No organization found with id {org_id}")
-    return db.query(FinancialSnapshots).filter(
-        FinancialSnapshots.organization_id == org_id,
-        FinancialSnapshots.snapshot_date >= start_date,
-        FinancialSnapshots.snapshot_date <= end_date
-    ).order_by(FinancialSnapshots.snapshot_date.asc()).all()
+        raise LookupError(f"No organization found with id {snapshot.org_id}")
+
+    rows = (
+        db.query(FinancialSnapshots)
+        .filter(
+            FinancialSnapshots.organization_id == snapshot.org_id,
+            FinancialSnapshots.snapshot_type == snapshot.snapshot_type,
+            FinancialSnapshots.snapshot_date >= snapshot.start_date,
+            FinancialSnapshots.snapshot_date <= snapshot.end_date,
+        )
+        .order_by(FinancialSnapshots.snapshot_date)
+        .all()
+    )
+
+    return [
+        {"snapshot_date": row.snapshot_date, "value": getattr(row, snapshot.metric_type)}
+        for row in rows
+    ]
 
 def refresh_or_create(db: Session, org_id: int):
     _upsert_base(db, org_id)

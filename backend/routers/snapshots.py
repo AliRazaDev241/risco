@@ -10,12 +10,13 @@ from datetime import datetime
 logger = get_logger(__name__)
 router = APIRouter(prefix="/snapshots", tags=["Snapshots"])
 
-@router.get("/", response_model=list[schema.SnapshotResponse])
-def get_snapshots(org_id: int, start_date: datetime, end_date: datetime, db: Session = Depends(get_db)):
+@router.post("/graph", response_model=list[schema.GraphResponse])
+def get_graph(snapshot: schema.GraphRequest, db: Session = Depends(get_db)):
     try:
-        return snapshot_service.get_range(org_id, start_date, end_date, db)
+        return snapshot_service.get_graph(snapshot, db)
     except LookupError as e:
+        logger.error("Organization not found, id %s: %s", snapshot.org_id, e)
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
-        logger.error("Failed to fetch snapshots for org %s: %s", org_id, e)
+        logger.error("Failed to fetch snapshots for org %s: %s", snapshot.org_id, e)
         raise HTTPException(status_code=500, detail="Failed to fetch snapshots")

@@ -253,15 +253,14 @@ class DashboardResponse(BaseModel):
     cash_balance: int
     monthly_revenue: int
     headcount: int
-class SnapshotResponse(BaseModel):
-    """Reads data from Financial Snapshots table"""
 
-    id: int
-    organization_id: int
+class GraphRequest(BaseModel):
+    org_id: int
+    snapshot_type: Literal["Base", "Best", "Worst"]
+    metric_type: Literal["cash_balance", "monthly_revenue", "monthly_expense"]
+    start_date: datetime
+    end_date: datetime
+
+class GraphResponse(BaseModel):
     snapshot_date: datetime
-    cash_balance: int
-    snapshot_type: str
-    monthly_revenue: int
-    monthly_expense: int
-
-    model_config = ConfigDict(from_attributes=True)
+    value: int
