@@ -26,16 +26,30 @@ def add_client(client: schema.ClientsCreate, db: Session):
         db.rollback()
         raise
 
-
 def update_reliability_score(db: Session, client_id: int):
-    score = recalculate_reliability(db, client_id)
-    db.execute(
-        text("""
-        UPDATE clients SET reliability_score = :score
+    from sqlalchemy import text
+
+    total = db.execute(text("""
+        SELECT COUNT(*) FROM revenue WHERE client_id = :client_id
+    """), {"client_id": client_id}).scalar() or 0
+
+    if total == 0:
+        return
+
+    received = db.execute(text("""
+        SELECT COUNT(*) FROM revenue 
+        WHERE client_id = :client_id 
+        AND date_received IS NOT NULL
+    """), {"client_id": client_id}).scalar() or 0
+
+    score = int((received / total) * 100)
+    
+    logger.info("Client %s: %s received out of %s total = score %s", client_id, received, total, score)
+    
+    db.execute(text("""
+        UPDATE clients SET reliability_score = :score 
         WHERE id = :client_id
-    """),
-        {"score": score, "client_id": client_id},
-    )
+    """), {"score": score, "client_id": client_id})
     db.commit()
 
 
