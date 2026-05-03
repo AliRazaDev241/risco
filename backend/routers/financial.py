@@ -6,13 +6,14 @@ from db import get_db
 import schema
 from services import financial as financial_service
 from logger import get_logger
+from typing import Annotated, TypeAlias
 
 logger = get_logger(__name__)
 router = APIRouter(prefix="/financial", tags=["Financial"])
-
+DbSession: TypeAlias = Annotated[Session, Depends(get_db)]
 
 @router.get("/intelligence", response_model=schema.IntelligenceResponse)
-def get_intelligence(org_id: int, db: Session = Depends(get_db)):
+def get_intelligence(org_id: int, db: DbSession):
     try:
         return financial_service.get_intelligence_metrics(org_id, db)
     except LookupError as e:
@@ -25,7 +26,7 @@ def get_intelligence(org_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/dashboard", response_model=schema.DashboardResponse)
-def get_dashboard(org_id: int, db: Session = Depends(get_db)):
+def get_dashboard(org_id: int, db: DbSession):
     try:
         return financial_service.get_dashboard_metrics(org_id, db)
     except LookupError as e:

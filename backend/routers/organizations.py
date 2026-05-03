@@ -6,15 +6,16 @@ from db import get_db
 import schema
 from services import organizations as org_service
 from logger import get_logger
+from typing import Annotated, TypeAlias
 
 logger = get_logger(__name__)
 
 router = APIRouter(prefix="/organizations", tags=["Organizations"])
-
+DbSession: TypeAlias = Annotated[Session, Depends(get_db)]
 
 # check if user has an org after login
 @router.get("/user/{user_id}", response_model=schema.OrganizationResponse)
-def get_user_organization(user_id: int, db: Session = Depends(get_db)):
+def get_user_organization(user_id: int, db: DbSession):
     member = org_service.check_membership_by_user(user_id, db)
     if not member:
         raise HTTPException(status_code=404, detail="No organization found")
@@ -27,7 +28,7 @@ def get_user_organization(user_id: int, db: Session = Depends(get_db)):
 def create_organization(
     org: schema.OrganizationCreate,
     creator_id: int,
-    db: Session = Depends(get_db),
+    db: DbSession,
 ):
     existing = org_service.get_organization_by_name(org.org_name, db)
     if existing:
@@ -38,7 +39,7 @@ def create_organization(
 # join an org
 @router.post("/join", response_model=schema.OrganizationResponse)
 def join_organization(
-    request: schema.OrganizationJoinRequest, db: Session = Depends(get_db)
+    request: schema.OrganizationJoinRequest, db: DbSession
 ):
     org = org_service.get_organization_by_name(request.org_name, db)
     if not org:
