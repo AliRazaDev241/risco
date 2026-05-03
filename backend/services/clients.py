@@ -2,6 +2,7 @@
 
 from sqlalchemy.orm import Session
 from models import Clients
+from sqlalchemy import text
 import schema
 from logger import get_logger
 
