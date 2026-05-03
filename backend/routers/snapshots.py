@@ -19,4 +19,4 @@ def get_graph(snapshot: schema.GraphRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         logger.error("Failed to fetch snapshots for org %s: %s", snapshot.org_id, e)
-        raise HTTPException(status_code=500, detail="Failed to fetch snapshots")
+        raise HTTPException(status_code=500, detail="Failed to fetch Graph Data")
