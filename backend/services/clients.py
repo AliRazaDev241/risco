@@ -1,9 +1,12 @@
 """Business logic for Clients"""
+
 from sqlalchemy.orm import Session
 from models import Clients
 import schema
 from logger import get_logger
+
 logger = get_logger(__name__)
+
 
 def add_client(client: schema.ClientsCreate, db: Session):
     try:

@@ -6,7 +6,6 @@ from datetime import datetime, timezone
 from services import expenses as expense_service
 import schema
 
-
 # ── Fixtures ────────────────────────────────────────────────────────────────
 
 

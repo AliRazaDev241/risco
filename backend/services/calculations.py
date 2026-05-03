@@ -2,7 +2,10 @@
 
 from sqlalchemy import func, extract
 
-def revenue_reliability_score(amounts: list[float], reliability_scores: list[int]) -> float:
+
+def revenue_reliability_score(
+    amounts: list[float], reliability_scores: list[int]
+) -> float:
     """
     Weighted average reliability score across all clients, weighted by revenue.
     Returns 0-100. Higher = your revenue comes from more reliable clients.
@@ -17,6 +20,7 @@ def revenue_reliability_score(amounts: list[float], reliability_scores: list[int
         return 0.0
     return sum(a * s for a, s in zip(amounts, reliability_scores)) / total
 
+
 def revenue_concentration_risk(amounts: list[float]) -> float:
     """
     Herfindahl-Hirschman Index (HHI) — measures how concentrated revenue is.
@@ -30,7 +34,8 @@ def revenue_concentration_risk(amounts: list[float]) -> float:
     if total == 0:
         return 0.0
     shares = [a / total for a in amounts]
-    return sum(s ** 2 for s in shares)
+    return sum(s**2 for s in shares)
+
 
 def reliable_revenue(amounts: list[float], reliability_scores: list[int]) -> float:
     """
@@ -45,9 +50,11 @@ def reliable_revenue(amounts: list[float], reliability_scores: list[int]) -> flo
         raise ValueError("amounts and reliability_scores must be the same length")
     return sum(a * (s / 100) for a, s in zip(amounts, reliability_scores))
 
+
 def total_revenue(amounts: list[float]) -> float:
     """Sum of all expected revenue amounts for the period."""
     return sum(amounts)
+
 
 def cash_runway(cash_balance: float, monthly_expenses: float) -> float | None:
     """
@@ -60,11 +67,17 @@ def cash_runway(cash_balance: float, monthly_expenses: float) -> float | None:
     return cash_balance / monthly_expenses
 
 
-def cash_balance(cash_balance_previous: float | None, monthly_revenue: float, monthly_expenses: float) -> float:
+def cash_balance(
+    cash_balance_previous: float | None, monthly_revenue: float, monthly_expenses: float
+) -> float:
     """
     Current cash balance.
     Previous balance + revenue received this month - expenses this month.
     If no previous balance exists (first month), starts from 0.
     """
-    previous = cash_balance_previous if (cash_balance_previous is not None and cash_balance_previous >= 0) else 0.0
+    previous = (
+        cash_balance_previous
+        if (cash_balance_previous is not None and cash_balance_previous >= 0)
+        else 0.0
+    )
     return previous + monthly_revenue - monthly_expenses

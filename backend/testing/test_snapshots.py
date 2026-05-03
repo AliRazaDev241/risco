@@ -5,7 +5,6 @@ from unittest.mock import MagicMock, patch
 from datetime import datetime, timezone
 from services import snapshots as snapshot_service
 
-
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 
 
@@ -43,7 +42,9 @@ def test_get_range_success(mock_db, sample_snapshot):
         MockSnapshot.snapshot_date.__le__ = MagicMock(return_value=True)
         mock_db.query().filter().order_by().all.return_value = [sample_snapshot]
 
-        result = snapshot_service.get_range(org_id=1, start_date=start, end_date=end, db=mock_db)
+        result = snapshot_service.get_range(
+            org_id=1, start_date=start, end_date=end, db=mock_db
+        )
 
     assert len(result) == 1
     assert result[0].snapshot_type == "Base"
@@ -56,7 +57,9 @@ def test_get_range_org_not_found_raises(mock_db):
     end = datetime(2025, 1, 31, tzinfo=timezone.utc)
 
     with pytest.raises(LookupError, match="No organization found"):
-        snapshot_service.get_range(org_id=999, start_date=start, end_date=end, db=mock_db)
+        snapshot_service.get_range(
+            org_id=999, start_date=start, end_date=end, db=mock_db
+        )
 
 
 def test_get_range_empty_returns_empty_list(mock_db):
@@ -72,7 +75,9 @@ def test_get_range_empty_returns_empty_list(mock_db):
         MockSnapshot.snapshot_date.__le__ = MagicMock(return_value=True)
         mock_db.query().filter().order_by().all.return_value = []
 
-        result = snapshot_service.get_range(org_id=1, start_date=start, end_date=end, db=mock_db)
+        result = snapshot_service.get_range(
+            org_id=1, start_date=start, end_date=end, db=mock_db
+        )
 
     assert result == []
 
@@ -81,9 +86,9 @@ def test_get_range_empty_returns_empty_list(mock_db):
 
 
 def test_refresh_or_create_calls_all_three_upserts(mock_db):
-    with patch.object(snapshot_service, "_upsert_base") as mock_base, \
-         patch.object(snapshot_service, "_upsert_best") as mock_best, \
-         patch.object(snapshot_service, "_upsert_worst") as mock_worst:
+    with patch.object(snapshot_service, "_upsert_base") as mock_base, patch.object(
+        snapshot_service, "_upsert_best"
+    ) as mock_best, patch.object(snapshot_service, "_upsert_worst") as mock_worst:
 
         snapshot_service.refresh_or_create(db=mock_db, org_id=1)
 
@@ -195,8 +200,9 @@ def test_upsert_worst_calls_upsert_snapshot(mock_db):
     mock_db.execute.return_value.fetchall.return_value = [row1, row2]
     mock_db.execute.return_value.scalar.return_value = 3000
 
-    with patch.object(snapshot_service, "_upsert_snapshot") as mock_upsert, \
-         patch("services.snapshots.reliable_revenue") as mock_reliable:
+    with patch.object(snapshot_service, "_upsert_snapshot") as mock_upsert, patch(
+        "services.snapshots.reliable_revenue"
+    ) as mock_reliable:
         mock_reliable.return_value = 3600.0
 
         snapshot_service._upsert_worst(db=mock_db, org_id=1)

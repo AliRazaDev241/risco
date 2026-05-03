@@ -1,4 +1,5 @@
 """API endpoints for Expenses"""
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db import get_db
@@ -10,6 +11,7 @@ from logger import get_logger
 logger = get_logger(__name__)
 router = APIRouter(prefix="/expenses", tags=["Expenses"])
 
+
 @router.post("/", response_model=schema.ExpenseResponse, status_code=201)
 def add_expense(expense: schema.ExpenseCreate, db: Session = Depends(get_db)):
     try:
@@ -20,8 +22,11 @@ def add_expense(expense: schema.ExpenseCreate, db: Session = Depends(get_db)):
         logger.error("Failed to add expense: %s", e)
         raise HTTPException(status_code=500, detail="Failed to add expense")
 
+
 @router.get("/", response_model=schema.ExpensePage)
-def list_expenses(org_id: int, expense_type: str, page_no: int, db: Session = Depends(get_db)):
+def list_expenses(
+    org_id: int, expense_type: str, page_no: int, db: Session = Depends(get_db)
+):
     try:
         return expense_service.list_five_expenses(org_id, expense_type, page_no, db)
     except LookupError as e:

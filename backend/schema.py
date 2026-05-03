@@ -108,11 +108,13 @@ class ClientsCreate(BaseModel):
 
 
 class ClientsUpdate(BaseModel):
-    """ Validates input before updating clients Table """
+    """Validates input before updating clients Table"""
+
     name: str | None = None
     email: str | None = None
     contact_number: str | None = None
     reliability_score: int | None = None
+
 
 class ClientsResponse(BaseModel):
     """Reads data from clients table"""
@@ -124,6 +126,7 @@ class ClientsResponse(BaseModel):
     contact_number: str | None
 
     model_config = ConfigDict(from_attributes=True)
+
 
 class RevenueCreate(BaseModel):
     org_id: int
@@ -140,6 +143,7 @@ class RevenueCreate(BaseModel):
             return v
         if isinstance(v, str):
             from datetime import datetime as dt
+
             v = dt.fromisoformat(v)
         if v.tzinfo is None:
             v = v.replace(tzinfo=timezone.utc)
@@ -147,15 +151,18 @@ class RevenueCreate(BaseModel):
             raise ValueError("date_received cannot be in the future")
         return v
 
+
 class RevenueUpdate(BaseModel):
     date_received: datetime | None = None
 
+
 class IntelligenceResponse(BaseModel):
-    revenue_reliability_score: float    # 0-100, weighted avg reliability of clients
-    revenue_concentration_risk: float   # 0-1 HHI, higher = more concentrated = riskier
-    reliable_revenue: float             # expected revenue weighted by reliability scores
-    total_revenue_expected: float       # sum of all expected revenue this month
-    actual_revenue: float               # sum of received revenue this month
+    revenue_reliability_score: float  # 0-100, weighted avg reliability of clients
+    revenue_concentration_risk: float  # 0-1 HHI, higher = more concentrated = riskier
+    reliable_revenue: float  # expected revenue weighted by reliability scores
+    total_revenue_expected: float  # sum of all expected revenue this month
+    actual_revenue: float  # sum of received revenue this month
+
 
 class RevenueResponse(BaseModel):
     """Reads data from Revenue table"""
@@ -169,6 +176,7 @@ class RevenueResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class RevenueListItem(BaseModel):
     id: int
     client_name: str
@@ -179,10 +187,12 @@ class RevenueListItem(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class RevenuePage(BaseModel):
     items: list[RevenueListItem]
     total_pages: int
     current_page: int
+
 
 class ExpenseCreate(BaseModel):
     organization_id: int
@@ -213,6 +223,7 @@ class ExpenseResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class ExpenseListItem(BaseModel):
     urgency: str
     expense_type: str
@@ -220,10 +231,12 @@ class ExpenseListItem(BaseModel):
     amount: int
     model_config = ConfigDict(from_attributes=True)
 
+
 class ExpensePage(BaseModel):
     items: list[ExpenseListItem]
     total_pages: int
     current_page: int
+
 
 class RiskAlertUpdate(BaseModel):
     """Validates input before updating RiskAlerts Table"""
@@ -247,12 +260,14 @@ class RiskAlertResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class DashboardResponse(BaseModel):
     cash_runway: float | None
     burn_rate: float
     cash_balance: int
     monthly_revenue: int
     headcount: int
+
 
 class GraphRequest(BaseModel):
     org_id: int
@@ -269,4 +284,3 @@ class GraphResponse(BaseModel):
     date_range_start: datetime
     date_range_end: datetime
     data: list[GraphDataPoint]
-

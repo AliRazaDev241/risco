@@ -6,7 +6,6 @@ from datetime import datetime, timezone
 from services import revenue as revenue_service
 import schema
 
-
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 
 
@@ -146,9 +145,7 @@ def test_update_revenue_success(mock_db, sample_revenue):
     mock_db.get.return_value = sample_revenue
     mock_db.refresh = MagicMock()
 
-    data = schema.RevenueUpdate(
-        date_received=datetime(2025, 5, 1, tzinfo=timezone.utc)
-    )
+    data = schema.RevenueUpdate(date_received=datetime(2025, 5, 1, tzinfo=timezone.utc))
 
     result = revenue_service.update_revenue(1, data, mock_db)
 
@@ -159,9 +156,7 @@ def test_update_revenue_success(mock_db, sample_revenue):
 def test_update_revenue_not_found_raises(mock_db):
     mock_db.get.return_value = None
 
-    data = schema.RevenueUpdate(
-        date_received=datetime(2025, 5, 1, tzinfo=timezone.utc)
-    )
+    data = schema.RevenueUpdate(date_received=datetime(2025, 5, 1, tzinfo=timezone.utc))
 
     with pytest.raises(LookupError, match="No revenue found with id 999"):
         revenue_service.update_revenue(999, data, mock_db)

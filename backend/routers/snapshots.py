@@ -1,4 +1,5 @@
 """API endpoints for Financial Snapshots"""
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db import get_db
@@ -9,6 +10,7 @@ from datetime import datetime
 
 logger = get_logger(__name__)
 router = APIRouter(prefix="/snapshots", tags=["Snapshots"])
+
 
 @router.post("/graph", response_model=schema.GraphResponse)
 def get_graph(snapshot: schema.GraphRequest, db: Session = Depends(get_db)):
