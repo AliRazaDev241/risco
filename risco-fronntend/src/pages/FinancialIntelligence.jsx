@@ -92,6 +92,7 @@ export default function FinancialIntelligence() {
 
   // ── Patch date received ──
   const handlePatchDate = async (revenueId, type) => {
+    if (!editDate) return
     setPatchLoading(true)
     try {
       const res = await fetch(`${BASE}/revenue/${revenueId}`, {

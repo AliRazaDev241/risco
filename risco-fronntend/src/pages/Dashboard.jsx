@@ -396,12 +396,6 @@ function SnapshotGraph({ orgId }) {
     monthly_expense: "Monthly Expense",
   }
 
-  const metricIcons = {
-    cash_balance: "💰",
-    monthly_revenue: "📈",
-    monthly_expense: "📉",
-  }
-
   const fetchData = async (types) => {
     setLoading(true); setError("")
     try {
@@ -498,11 +492,13 @@ function SnapshotGraph({ orgId }) {
             ticks: {
               font: { size: 11 },
               color: "#9ca3af",
+              autoSkip: true,          // ← add this
+              maxTicksLimit: 12,        // ← add this — shows max 12 labels
               callback: (_, i, vals) => {
                 const label = chartInstance.current?.data.labels[i]
                 if (!label) return ""
                 const d = new Date(label)
-                return d.toLocaleString("default", { month: "short", year: "2-digit" })
+                return d.toLocaleString("default", { month: "short", year: "numeric" })
               }
             },
             border: { display: false }
@@ -543,7 +539,7 @@ function SnapshotGraph({ orgId }) {
       <div className="flex flex-wrap items-center justify-between gap-3 px-6 pt-5 pb-4 border-b border-teal-50">
         <div>
           <h3 className="text-sm font-bold text-[#1a3a32]">Financial Snapshot</h3>
-          <p className="text-xs text-gray-400 mt-0.5">{metricIcons[metricType]} {metricLabels[metricType]} over time</p>
+          <p className="text-xs text-gray-400 mt-0.5">{metricLabels[metricType]} over time</p>
         </div>
 
         {/* Snapshot type pills */}
@@ -562,52 +558,57 @@ function SnapshotGraph({ orgId }) {
       </div>
 
       {/* Controls */}
-      <div className="flex flex-wrap items-end gap-6 px-6 py-4 bg-[#fafffe]">
+      {/* Controls */}
+      <div className="flex items-end justify-between gap-4 px-6 py-4 bg-[#fafffe] border-b border-teal-50">
 
-        {/* Metric pills */}
-        <div>
-          <p className="text-xs text-gray-400 uppercase tracking-widest mb-2">Metric</p>
-          <div className="flex gap-2">
-            {Object.entries(metricLabels).map(([key, label]) => (
-              <button key={key} onClick={() => setMetricType(key)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border transition-all duration-200 ${
-                  metricType === key
-                    ? "border-teal-500 bg-teal-50 text-teal-700 font-medium"
-                    : "border-gray-200 text-gray-500 hover:border-teal-300 bg-white"
-                }`}>
-                <span>{metricIcons[key]}</span>
-                {label}
-              </button>
+        {/* Left — Metric + Date stacked */}
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1.5">
+            <p className="text-xs text-gray-400 uppercase tracking-widest">Metric</p>
+            <div className="flex bg-gray-100 rounded-xl p-1 gap-0.5">
+              {Object.entries(metricLabels).map(([key, label]) => (
+                <button key={key} onClick={() => setMetricType(key)}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${metricType === key
+                      ? "bg-white text-teal-700 shadow-sm border border-teal-100"
+                      : "text-gray-500 hover:text-gray-700"
+                    }`}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Date range below metric */}
+          <div className="flex flex-col gap-1.5">
+            <p className="text-xs text-gray-400 uppercase tracking-widest">Time Filter</p>
+            <div className="flex items-center gap-2">
+              <input type="date" value={startDate}
+                min={dateRangeMin || undefined} max={endDate}
+                onChange={e => setStartDate(e.target.value)}
+                className="text-xs bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 text-gray-600 focus:outline-none focus:border-teal-400 shadow-sm" />
+              <span className="text-gray-400 text-xs">→</span>
+              <input type="date" value={endDate}
+                min={startDate} max={dateRangeMax || undefined}
+                onChange={e => setEndDate(e.target.value)}
+                className="text-xs bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 text-gray-600 focus:outline-none focus:border-teal-400 shadow-sm" />
+            </div>
+          </div>
+        </div>
+
+        {/* Right — Legend aligned to bottom */}
+        <div className="flex flex-col gap-1.5 items-end">
+          <p className="text-xs text-gray-400 uppercase tracking-widest">Legend</p>
+          <div className="flex items-center gap-4 bg-gray-100 rounded-xl px-4 py-2">
+            {(snapshotType === "All" ? snapshotTypes : [snapshotType]).map(t => (
+              <div key={t} className="flex items-center gap-1.5">
+                <div className="w-6 h-0.5 rounded-full" style={{ background: lineColors[t].border }} />
+                <div className="w-2 h-2 rounded-full border-2 bg-white" style={{ borderColor: lineColors[t].border }} />
+                <span className="text-xs font-medium" style={{ color: lineColors[t].border }}>{t}</span>
+              </div>
             ))}
           </div>
         </div>
 
-        {/* Date range */}
-        <div>
-          <p className="text-xs text-gray-400 uppercase tracking-widest mb-2">Time Filter</p>
-          <div className="flex items-center gap-2">
-            <input type="date" value={startDate}
-              min={dateRangeMin || undefined} max={endDate}
-              onChange={e => setStartDate(e.target.value)}
-              className="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 text-gray-600 bg-white focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-100"/>
-            <span className="text-gray-300 text-sm">→</span>
-            <input type="date" value={endDate}
-              min={startDate} max={dateRangeMax || undefined}
-              onChange={e => setEndDate(e.target.value)}
-              className="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 text-gray-600 bg-white focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-100"/>
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div className="ml-auto flex items-center gap-4">
-          {(snapshotType === "All" ? snapshotTypes : [snapshotType]).map(t => (
-            <div key={t} className="flex items-center gap-1.5">
-              <div className="w-8 h-0.5 rounded-full" style={{ background: lineColors[t].border }}/>
-              <div className="w-2 h-2 rounded-full border-2" style={{ borderColor: lineColors[t].border, background: "#fff" }}/>
-              <span className="text-xs font-medium" style={{ color: lineColors[t].border }}>{t}</span>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* Chart area */}

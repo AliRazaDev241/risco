@@ -10,7 +10,6 @@ from logger import get_logger
 
 logger = get_logger(__name__)
 
-
 def get_graph(snapshot: schema.GraphRequest, db):
     org = db.execute(
         text("SELECT id FROM organizations WHERE id = :org_id"),
