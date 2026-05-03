@@ -357,7 +357,7 @@ const navItems = [
 //   )
 // }
 
-function SnapshotGraph({ orgId }) {
+function SnapshotGraph({ orgId, active }) {
   const chartRef = useRef(null)
   const chartInstance = useRef(null)
 
@@ -522,15 +522,16 @@ function SnapshotGraph({ orgId }) {
   }
 
   useEffect(() => {
-    const types = snapshotType === "All" ? snapshotTypes : [snapshotType]
-    fetchData(types)
-    return () => {
-      if (chartInstance.current) {
-        chartInstance.current.destroy()
-        chartInstance.current = null
-      }
+  if (active !== "overview") return
+  const types = snapshotType === "All" ? snapshotTypes : [snapshotType]
+  fetchData(types)
+  return () => {
+    if (chartInstance.current) {
+      chartInstance.current.destroy()
+      chartInstance.current = null
     }
-  }, [snapshotType, metricType, startDate, endDate])
+  }
+}, [snapshotType, metricType, startDate, endDate, active])
 
   return (
     <div className="mt-6 bg-white/80 backdrop-blur border border-teal-100 rounded-2xl shadow-sm overflow-hidden">
@@ -640,7 +641,9 @@ export default function Dashboard() {
   const [dashLoading, setDashLoading] = useState(true)
   const [dashError, setDashError] = useState("")
 
-  useEffect(() => { fetchDashboard() }, [])
+  useEffect(() => {
+    if (active === "overview") fetchDashboard()
+  }, [active])
 
   const fetchDashboard = async () => {
     setDashLoading(true); setDashError("")
@@ -744,27 +747,6 @@ export default function Dashboard() {
               ))}
             </div>
 
-            {/* Section cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <button
-                onClick={() => setActive("finance")}
-                className="bg-white/70 backdrop-blur border border-teal-100 rounded-2xl p-6 text-left hover:border-teal-400 hover:shadow-md transition-all duration-300"
-              >
-                <div className="text-2xl mb-3">📉</div>
-                <h3 className="text-base font-semibold text-[#1a3a32] mb-1">Financial Intelligence</h3>
-                <p className="text-xs text-gray-400">Revenue · Reliability · Risk analysis</p>
-              </button>
-
-              <button
-                onClick={() => setActive("operations")}
-                className="bg-white/70 backdrop-blur border border-teal-100 rounded-2xl p-6 text-left hover:border-teal-400 hover:shadow-md transition-all duration-300"
-              >
-                <div className="text-2xl mb-3">⚙️</div>
-                <h3 className="text-base font-semibold text-[#1a3a32] mb-1">Operations</h3>
-                <p className="text-xs text-gray-400">Team · Clients · Entries</p>
-              </button>
-            </div>
-
             {/* Risk alert — only shows when runway is low */}
             {isLowRunway && (
               <div className="bg-red-50 border border-red-200 rounded-xl px-5 py-4">
@@ -776,7 +758,7 @@ export default function Dashboard() {
             )}
 
             {/* Graph — add this */}
-            <SnapshotGraph orgId={orgId} />
+            <SnapshotGraph orgId={orgId} active={active} />
 
           </div>
         )}
