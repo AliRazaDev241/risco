@@ -53,67 +53,38 @@ def refresh_or_create(db: Session, org_id: int):
     _upsert_best(db, org_id)
     _upsert_worst(db, org_id)
 
-def _upsert_snapshot(db: Session, org_id: int, snapshot_type: str, monthly_revenue, monthly_expenses):
-    now = datetime.now(timezone.utc)
-    month, year = now.month, now.year
-    cash_balance = monthly_revenue - monthly_expenses
-
-    snapshot = db.query(FinancialSnapshots).filter(
-        FinancialSnapshots.organization_id == org_id,
-        extract('month', FinancialSnapshots.snapshot_date) == month,
-        extract('year', FinancialSnapshots.snapshot_date) == year,
-        FinancialSnapshots.snapshot_type == snapshot_type  # was .type
-    ).first()
-
-    if not snapshot:
-        snapshot = FinancialSnapshots(
-            organization_id=org_id,
-            snapshot_date=now.date().replace(day=1),
-            snapshot_type=snapshot_type,             # was type=
-            monthly_revenue=monthly_revenue,
-            monthly_expense=monthly_expenses,        # was monthly_expenses
-            cash_balance=cash_balance
-        )
-        db.add(snapshot)
-        logger.info("Created %s snapshot for org %s %s/%s", snapshot_type, org_id, month, year)
-    else:
-        snapshot.monthly_revenue = monthly_revenue
-        snapshot.monthly_expense = monthly_expenses  # was monthly_expenses
-        snapshot.cash_balance = cash_balance
-        logger.info("Updated %s snapshot for org %s %s/%s", snapshot_type, org_id, month, year)
-
-    db.commit()
 
 def _upsert_base(db: Session, org_id: int):
     now = datetime.now(timezone.utc)
     month, year = now.month, now.year
 
-    monthly_expenses = db.query(func.sum(Expenses.amount)).filter(
-        Expenses.organization_id == org_id,
-        extract('month', Expenses.date) == month,
-        extract('year', Expenses.date) == year
-    ).scalar() or 0
+    monthly_expenses = db.execute(text("""
+        SELECT NVL(SUM(amount), 0) FROM expenses
+        WHERE organization_id = :org_id
+        AND EXTRACT(MONTH FROM "date") = :month
+        AND EXTRACT(YEAR FROM "date") = :year
+    """), {"org_id": org_id, "month": month, "year": year}).scalar()
 
-    monthly_revenue = db.query(func.sum(Revenue.amount)).join(
-        Clients, Revenue.client_id == Clients.id
-    ).filter(
-        Clients.organization_id == org_id,
-        extract('month', Revenue.date_received) == month,
-        extract('year', Revenue.date_received) == year
-    ).scalar() or 0
+    monthly_revenue = db.execute(text("""
+        SELECT NVL(SUM(revenue.amount), 0) FROM revenue
+        JOIN clients ON clients.id = revenue.client_id
+        WHERE clients.organization_id = :org_id
+        AND EXTRACT(MONTH FROM revenue.date_received) = :month
+        AND EXTRACT(YEAR FROM revenue.date_received) = :year
+    """), {"org_id": org_id, "month": month, "year": year}).scalar()
 
-    _upsert_snapshot(db, org_id, "Base", monthly_revenue, monthly_expenses)  # capital B to match constraint
+    _upsert_snapshot(db, org_id, "Base", monthly_revenue, monthly_expenses)
 
 def _upsert_best(db: Session, org_id: int):
     now = datetime.now(timezone.utc)
     month, year = now.month, now.year
 
     expected_amounts = db.execute(text("""
-        SELECT r.amount FROM revenue r
-        JOIN clients c ON c.id = r.client_id
-        WHERE c.organization_id = :org_id
-        AND EXTRACT(MONTH FROM r.date_expected) = :month
-        AND EXTRACT(YEAR FROM r.date_expected) = :year
+        SELECT revenue.amount FROM revenue
+        JOIN clients ON clients.id = revenue.client_id
+        WHERE clients.organization_id = :org_id
+        AND EXTRACT(MONTH FROM revenue.date_expected) = :month
+        AND EXTRACT(YEAR FROM revenue.date_expected) = :year
     """), {"org_id": org_id, "month": month, "year": year}).fetchall()
 
     non_critical_expenses = db.execute(text("""
@@ -132,11 +103,11 @@ def _upsert_worst(db: Session, org_id: int):
     month, year = now.month, now.year
 
     client_revenue = db.execute(text("""
-        SELECT r.amount, c.reliability_score FROM revenue r
-        JOIN clients c ON c.id = r.client_id
-        WHERE c.organization_id = :org_id
-        AND EXTRACT(MONTH FROM r.date_expected) = :month
-        AND EXTRACT(YEAR FROM r.date_expected) = :year
+        SELECT revenue.amount, clients.reliability_score FROM revenue
+        JOIN clients ON clients.id = revenue.client_id
+        WHERE clients.organization_id = :org_id
+        AND EXTRACT(MONTH FROM revenue.date_expected) = :month
+        AND EXTRACT(YEAR FROM revenue.date_expected) = :year
     """), {"org_id": org_id, "month": month, "year": year}).fetchall()
 
     all_expenses = db.execute(text("""
@@ -147,6 +118,71 @@ def _upsert_worst(db: Session, org_id: int):
     """), {"org_id": org_id, "month": month, "year": year}).scalar()
 
     amounts = [row.amount for row in client_revenue]
-    # scores = [row.reliability_score for row in client_revenue]
     scores = [row.reliability_score if row.reliability_score is not None else 0 for row in client_revenue]
     _upsert_snapshot(db, org_id, "Worst", reliable_revenue(amounts, scores), all_expenses)
+
+
+def _upsert_snapshot(db: Session, org_id: int, snapshot_type: str, monthly_revenue, monthly_expenses):
+    now = datetime.now(timezone.utc)
+    month, year = now.month, now.year
+
+    if snapshot_type == "Base":
+        prev_month = month - 1 if month > 1 else 12
+        prev_year = year if month > 1 else year - 1
+        prev_snapshot = db.execute(text("""
+            SELECT cash_balance FROM financial_snapshots
+            WHERE organization_id = :org_id
+            AND EXTRACT(MONTH FROM snapshot_date) = :month
+            AND EXTRACT(YEAR FROM snapshot_date) = :year
+            AND snapshot_type = 'Base'
+        """), {"org_id": org_id, "month": prev_month, "year": prev_year}).first()
+        prev_balance = prev_snapshot.cash_balance if prev_snapshot else None
+        cash_balance = calculations.cash_balance(prev_balance, monthly_revenue, monthly_expenses)
+    else:
+        cash_balance = monthly_revenue - monthly_expenses
+
+    snapshot = db.execute(text("""
+        SELECT * FROM financial_snapshots
+        WHERE organization_id = :org_id
+        AND EXTRACT(MONTH FROM snapshot_date) = :month
+        AND EXTRACT(YEAR FROM snapshot_date) = :year
+        AND snapshot_type = :snapshot_type
+    """), {"org_id": org_id, "month": month, "year": year, "snapshot_type": snapshot_type}).first()
+
+    if not snapshot:
+        db.execute(text("""
+            INSERT INTO financial_snapshots
+                (organization_id, snapshot_date, snapshot_type, monthly_revenue, monthly_expense, cash_balance)
+            VALUES
+                (:org_id, :snapshot_date, :snapshot_type, :monthly_revenue, :monthly_expense, :cash_balance)
+        """), {
+            "org_id": org_id,
+            "snapshot_date": now.date().replace(day=1),
+            "snapshot_type": snapshot_type,
+            "monthly_revenue": monthly_revenue,
+            "monthly_expense": monthly_expenses,
+            "cash_balance": cash_balance
+        })
+        logger.info("Created %s snapshot for org %s %s/%s", snapshot_type, org_id, month, year)
+    else:
+        db.execute(text("""
+            UPDATE financial_snapshots
+            SET monthly_revenue = :monthly_revenue,
+                monthly_expense = :monthly_expense,
+                cash_balance = :cash_balance
+            WHERE organization_id = :org_id
+            AND EXTRACT(MONTH FROM snapshot_date) = :month
+            AND EXTRACT(YEAR FROM snapshot_date) = :year
+            AND snapshot_type = :snapshot_type
+        """), {
+            "org_id": org_id,
+            "month": month,
+            "year": year,
+            "snapshot_type": snapshot_type,
+            "monthly_revenue": monthly_revenue,
+            "monthly_expense": monthly_expenses,
+            "cash_balance": cash_balance
+        })
+        logger.info("Updated %s snapshot for org %s %s/%s", snapshot_type, org_id, month, year)
+
+    db.commit()
