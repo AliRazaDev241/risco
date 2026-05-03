@@ -72,8 +72,8 @@ def get_dashboard_metrics(org_id: int, db: Session):
         SELECT NVL(SUM(amount), 0)
         FROM expenses
         WHERE organization_id = :org_id
-        AND EXTRACT(MONTH FROM date) = :month
-        AND EXTRACT(YEAR FROM date) = :year
+        AND EXTRACT(MONTH FROM "date") = :month
+        AND EXTRACT(YEAR FROM "date") = :year
     """), {"org_id": org_id, "month": month, "year": year}).scalar()
 
     # Previous cash balance from the most recent snapshot
@@ -87,7 +87,7 @@ def get_dashboard_metrics(org_id: int, db: Session):
 
     # Headcount
     headcount = db.execute(text("""
-        SELECT COUNT(user_id)
+        SELECT COUNT(member_id)
         FROM organization_members
         WHERE organization_id = :org_id
     """), {"org_id": org_id}).scalar() or 0
