@@ -22,11 +22,6 @@ export default function Login() {
 
       const data = await response.json()
 
-      // if (response.ok) {
-      //   localStorage.setItem("token", data.token || "logged-in")
-      //   // alert("Login successful! Redirect to dashboard here.")
-      //   window.location.href = "/orgselect"
-      // }
       if (response.ok) {
         localStorage.setItem("token", data.token || "logged-in")
         localStorage.setItem("user_id", data.id)
