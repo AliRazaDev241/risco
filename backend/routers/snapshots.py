@@ -7,13 +7,14 @@ import schema
 from services import snapshots as snapshot_service
 from logger import get_logger
 from datetime import datetime
+from typing import Annotated, TypeAlias
 
 logger = get_logger(__name__)
 router = APIRouter(prefix="/snapshots", tags=["Snapshots"])
-
+DbSession: TypeAlias = Annotated[Session, Depends(get_db)]
 
 @router.post("/graph", response_model=schema.GraphResponse)
-def get_graph(snapshot: schema.GraphRequest, db: Session = Depends(get_db)):
+def get_graph(snapshot: schema.GraphRequest, db: DbSession):
     try:
         return snapshot_service.get_graph(snapshot, db)
     except LookupError as e:

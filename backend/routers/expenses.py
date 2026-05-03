@@ -7,13 +7,14 @@ import schema
 from services import expenses as expense_service
 from coordinators import expense_coordinator
 from logger import get_logger
+from typing import Annotated, TypeAlias
 
 logger = get_logger(__name__)
 router = APIRouter(prefix="/expenses", tags=["Expenses"])
-
+DbSession: TypeAlias = Annotated[Session, Depends(get_db)]
 
 @router.post("/", response_model=schema.ExpenseResponse, status_code=201)
-def add_expense(expense: schema.ExpenseCreate, db: Session = Depends(get_db)):
+def add_expense(expense: schema.ExpenseCreate, db: DbSession):
     try:
         return expense_coordinator.add_expense(expense, db)
     except LookupError as e:
@@ -25,7 +26,7 @@ def add_expense(expense: schema.ExpenseCreate, db: Session = Depends(get_db)):
 
 @router.get("/", response_model=schema.ExpensePage)
 def list_expenses(
-    org_id: int, expense_type: str, page_no: int, db: Session = Depends(get_db)
+    org_id: int, expense_type: str, page_no: int, db: DbSession
 ):
     try:
         return expense_service.list_five_expenses(org_id, expense_type, page_no, db)

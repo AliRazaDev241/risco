@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, extract, text
 from models import Revenue, Expenses, Clients, FinancialSnapshots
 import schema
-import calculations
+from services import calculations
 from logger import get_logger
 
 logger = get_logger(__name__)

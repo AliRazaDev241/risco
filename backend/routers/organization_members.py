@@ -6,15 +6,16 @@ from db import get_db
 import schema
 from services import organization_members as org_mem_service
 from logger import get_logger
+from typing import Annotated, TypeAlias
 
 logger = get_logger(__name__)
-
+DbSession: TypeAlias = Annotated[Session, Depends(get_db)]
 
 router = APIRouter(prefix="/organizations/{org_id}/members", tags=["Members & Roles"])
 
 
 @router.get("/", response_model=list[schema.MemberListResponse])
-def list_members(org_id: int, db: Session = Depends(get_db)):
+def list_members(org_id: int, db: DbSession):
     try:
         return org_mem_service.get_all_members(org_id, db)
     except Exception as e:
@@ -24,7 +25,7 @@ def list_members(org_id: int, db: Session = Depends(get_db)):
 
 @router.post("/", status_code=201)
 def add_member(
-    org_id: int, data: schema.AddMemberRequest, db: Session = Depends(get_db)
+    org_id: int, data: schema.AddMemberRequest, db: DbSession
 ):
     try:
         return org_mem_service.add_member(
@@ -40,7 +41,7 @@ def add_member(
 
 
 @router.delete("/{member_id}", status_code=200)
-def remove_member(org_id: int, member_id: int, db: Session = Depends(get_db)):
+def remove_member(org_id: int, member_id: int, db: DbSession):
     try:
         return org_mem_service.remove_member(db, org_id, member_id)
     except LookupError as e:
