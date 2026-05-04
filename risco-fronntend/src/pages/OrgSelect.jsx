@@ -95,6 +95,12 @@ export default function OrgSelect() {
             >
               Create an Organization
             </button>
+            <button
+              onClick={() => window.location.href = "/"}
+              className="w-full py-2 text-xs text-gray-400 hover:text-teal-700 transition-colors"
+            >
+              ← Back to Login
+            </button>
           </div>
         )}
 
