@@ -33,7 +33,7 @@ def sample_expense_data():
 def test_add_expense_success(mock_db, sample_expense_data):
     mock_db.execute.return_value.fetchone.return_value = (1,)
     mock_db.refresh = MagicMock()
-    result = expense_service.add_expense(sample_expense_data, mock_db)
+    expense_service.add_expense(sample_expense_data, mock_db)
     mock_db.add.assert_called_once()
     mock_db.commit.assert_called_once()
     mock_db.refresh.assert_called_once()
@@ -85,21 +85,18 @@ def test_list_five_expenses_correct_page_returned(mock_db):
     mock_db.execute.return_value.fetchone.return_value = (1,)
     mock_db.execute.return_value.scalar.return_value = 10
     mock_db.execute.return_value.fetchall.return_value = []
-    result = expense_service.list_five_expenses(1, "One_Time", 2, mock_db)
-    assert result["current_page"] == 2
+    assert expense_service.list_five_expenses(1, "One_Time", 2, mock_db)["current_page"] == 2
 
 
 def test_list_five_expenses_total_pages_calculated(mock_db):
     mock_db.execute.return_value.fetchone.return_value = (1,)
     mock_db.execute.return_value.scalar.return_value = 10
     mock_db.execute.return_value.fetchall.return_value = []
-    result = expense_service.list_five_expenses(1, "One_Time", 1, mock_db)
-    assert result["total_pages"] == 2
+    assert expense_service.list_five_expenses(1, "One_Time", 1, mock_db)["total_pages"] == 2
 
 
 def test_list_five_expenses_empty_returns_one_page(mock_db):
     mock_db.execute.return_value.fetchone.return_value = (1,)
     mock_db.execute.return_value.scalar.return_value = 0
     mock_db.execute.return_value.fetchall.return_value = []
-    result = expense_service.list_five_expenses(1, "One_Time", 1, mock_db)
-    assert result["total_pages"] == 1
+    assert expense_service.list_five_expenses(1, "One_Time", 1, mock_db)["total_pages"] == 1
