@@ -228,7 +228,7 @@ export default function Operations() {
           <div className="flex flex-wrap items-end md:grid-cols-3 gap-3">
             <div className="flex-1 min-w-[150px]">
               <label htmlFor="client-name" className={labelClass}>Name</label>
-              <input id="client-name" type="text" placeholder="Acme Corp" value={clientForm.client_name}
+              <input id="client-name" type="text" placeholder="Zain Ahmed" value={clientForm.client_name}
                 onChange={e => setClientForm({ ...clientForm, client_name: e.target.value })}
                 className={inputClass} />
             </div>
@@ -240,7 +240,7 @@ export default function Operations() {
             </div>
             <div className="flex-1 min-w-[150px]">
               <label htmlFor="client-contact" className={labelClass}>Contact No. <span className="text-gray-400">(optional)</span></label>
-              <input id="client-contact" type="text" placeholder="+1 234 567 8900" value={clientForm.contact_num}
+              <input id="client-contact" type="text" placeholder="+92 332 4543627" value={clientForm.contact_num}
                 onChange={e => setClientForm({ ...clientForm, contact_num: e.target.value })}
                 className={inputClass} />
             </div>
@@ -272,7 +272,7 @@ export default function Operations() {
           <div className="flex flex-wrap items-end md:grid-cols-3 gap-3">
             <div className="flex-1 min-w-[150px]">
               <label htmlFor="revenue-client-name" className={labelClass}>Client Name</label>
-              <input id="revenue-client-name" type="text" placeholder="Acme Corp" value={revenueForm.client_name}
+              <input id="revenue-client-name" type="text" placeholder="Zain Ahmed" value={revenueForm.client_name}
                 onChange={e => setRevenueForm({ ...revenueForm, client_name: e.target.value })}
                 className={inputClass} />
             </div>

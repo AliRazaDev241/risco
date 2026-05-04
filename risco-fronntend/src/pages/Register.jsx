@@ -63,7 +63,7 @@ export default function Register() {
                 id="first_name"
                 type="text"
                 name="first_name"
-                placeholder="John"
+                placeholder="Zain"
                 value={form.first_name}
                 onChange={handleChange}
                 className="w-full mt-1 px-4 py-3 bg-white border border-teal-200 rounded-lg text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
@@ -75,7 +75,7 @@ export default function Register() {
                 id="last_name"
                 type="text"
                 name="last_name"
-                placeholder="Doe"
+                placeholder="Ahmed"
                 value={form.last_name}
                 onChange={handleChange}
                 className="w-full mt-1 px-4 py-3 bg-white border border-teal-200 rounded-lg text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
