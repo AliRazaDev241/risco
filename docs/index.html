@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RISCO — Financial Risk Management System</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #dce8e4;
+      --surface: #ffffff;
+      --surface2: #f0f7f5;
+      --border: rgba(45,125,110,0.15);
+      --accent: #2d7d6e;
+      --accent2: #c49a1a;
+      --text: #1a2e2a;
+      --muted: #607d78;
+      --mono: 'DM Mono', monospace;
+      --head: 'Syne', sans-serif;
+      --body: 'DM Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--body);
+      font-weight: 300;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.1rem 3rem;
+      background: rgba(220,232,228,0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: var(--head);
+      font-weight: 800;
+      font-size: 1.3rem;
+      letter-spacing: -0.02em;
+      color: var(--accent);
+    }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 8rem 3rem 5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 70% 30%, rgba(45,125,110,0.1) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 20% 80%, rgba(196,154,26,0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hero-tag {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.1s forwards;
+    }
+    .hero h1 {
+      font-family: var(--head);
+      font-size: clamp(3.5rem, 9vw, 8rem);
+      font-weight: 800;
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+      max-width: 800px;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.25s forwards;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero-sub {
+      margin-top: 2rem;
+      font-size: 1.15rem;
+      color: var(--muted);
+      max-width: 520px;
+      font-weight: 400;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.4s forwards;
+    }
+    .hero-cta {
+      margin-top: 3rem;
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.55s forwards;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.75rem 1.75rem;
+      border-radius: 2px;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+      border: 1px solid var(--accent);
+    }
+    .btn-primary:hover { background: #235f54; }
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--muted); }
+
+    .hero-grid {
+      position: absolute; right: 3rem; top: 50%; transform: translateY(-50%);
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 1px;
+      opacity: 0.15;
+      animation: fadeIn 1.5s 0.8s forwards;
+    }
+    .grid-cell {
+      width: 36px; height: 36px;
+      border: 1px solid rgba(45,125,110,0.3);
+    }
+    .grid-cell.lit { background: rgba(45,125,110,0.35); }
+
+    /* ── SECTIONS ── */
+    section { padding: 6rem 3rem; max-width: 1100px; margin: 0 auto; }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 1rem;
+    }
+    h2 {
+      font-family: var(--head);
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 2.5rem;
+      line-height: 1.1;
+    }
+
+    /* ── OVERVIEW GRID ── */
+    .overview-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+    .overview-card {
+      background: var(--surface);
+      padding: 2rem;
+      transition: background 0.2s;
+    }
+    .overview-card:hover { background: var(--surface2); }
+    .overview-card h3 {
+      font-family: var(--head);
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--accent);
+    }
+    .overview-card p { color: var(--muted); font-size: 0.9rem; }
+
+    /* ── TECH STACK ── */
+    .stack-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+    .stack-card {
+      background: var(--surface);
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .stack-card::after {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--accent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s;
+    }
+    .stack-card:hover::after { transform: scaleX(1); }
+    .stack-layer {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+    .stack-name {
+      font-family: var(--head);
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .stack-detail { font-size: 0.82rem; color: var(--muted); margin-top: 0.3rem; }
+
+    /* ── ARCHITECTURE ── */
+    .arch-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 2.5rem;
+    }
+    .arch-flow {
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .arch-layer {
+      display: flex; align-items: center; gap: 1.5rem;
+      padding: 1.1rem 1.5rem;
+      border-left: 2px solid var(--border);
+      position: relative;
+    }
+    .arch-layer.active { border-left-color: var(--accent); }
+    .arch-layer::before {
+      content: '';
+      position: absolute; left: -6px; top: 50%; transform: translateY(-50%);
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--border);
+    }
+    .arch-layer.active::before { background: var(--accent); }
+    .arch-name {
+      font-family: var(--head);
+      font-weight: 600;
+      font-size: 0.95rem;
+      min-width: 160px;
+    }
+    .arch-desc { color: var(--muted); font-size: 0.85rem; }
+    .arch-sub {
+      margin-left: 2.5rem;
+      padding: 0.5rem 0 0.5rem 1.5rem;
+      border-left: 2px solid var(--border);
+      display: flex; flex-direction: column; gap: 0.25rem;
+    }
+    .arch-sub span {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .arch-sub span em { color: var(--accent2); font-style: normal; }
+    .arch-arrow {
+      text-align: center;
+      color: var(--muted);
+      font-size: 1.2rem;
+      margin-left: 1.3rem;
+      line-height: 1;
+    }
+
+    /* ── DATABASE SCHEMA ── */
+    .schema-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+    .schema-card {
+      background: var(--surface);
+      padding: 1.4rem 1.6rem;
+      transition: background 0.2s;
+    }
+    .schema-card:hover { background: var(--surface2); }
+    .schema-table {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+    }
+    .schema-desc { font-size: 0.85rem; color: var(--muted); }
+
+    /* ── FEATURES ── */
+    .features-list { display: flex; flex-direction: column; gap: 1px; }
+    .feature-item {
+      display: flex; align-items: flex-start; gap: 1.2rem;
+      padding: 1.2rem 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      transition: border-color 0.2s;
+    }
+    .feature-item:hover { border-color: rgba(45,125,110,0.3); }
+    .feature-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-top: 0.45rem;
+      flex-shrink: 0;
+    }
+    .done { background: var(--accent); }
+    .wip { background: var(--accent2); }
+    .planned { background: var(--muted); }
+    .feature-text { font-size: 0.9rem; }
+    .feature-badge {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 2px;
+      margin-left: 0.6rem;
+      vertical-align: middle;
+    }
+    .badge-done { background: rgba(45,125,110,0.12); color: var(--accent); }
+    .badge-wip { background: rgba(196,154,26,0.15); color: var(--accent2); }
+    .badge-planned { background: rgba(107,107,122,0.2); color: var(--muted); }
+
+    /* ── INSTALL ── */
+    .steps { display: flex; flex-direction: column; gap: 1.5rem; }
+    .step {
+      display: grid;
+      grid-template-columns: 2.5rem 1fr;
+      gap: 1.2rem;
+      align-items: start;
+    }
+    .step-num {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--accent);
+      background: rgba(45,125,110,0.1);
+      border: 1px solid rgba(45,125,110,0.25);
+      border-radius: 2px;
+      width: 2.5rem; height: 2.5rem;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-content h4 {
+      font-family: var(--head);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+    pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 0.9rem 1.2rem;
+      border-radius: 2px;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: #2d7d6e;
+      overflow-x: auto;
+      margin-top: 0.5rem;
+    }
+    .note {
+      margin-top: 0.5rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    /* ── ENV VARS ── */
+    .env-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1100px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .footer-logo {
+      font-family: var(--head);
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .footer-note { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+
+    /* ── DIVIDER ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; } to { opacity: 0.15; }
+    }
+
+    @media (max-width: 700px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      .hero { padding: 7rem 1.5rem 4rem; }
+      .hero-grid { display: none; }
+      section { padding: 4rem 1.5rem; }
+      .overview-grid { grid-template-columns: 1fr; }
+      .arch-layer { flex-direction: column; gap: 0.5rem; }
+      footer { padding: 2rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-logo">RISCO</span>
+  <ul class="nav-links">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#stack">Stack</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#schema">Schema</a></li>
+    <li><a href="#install">Install</a></li>
+    <li><a href="https://github.com/AliRazaDev241/risco" target="_blank">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <p class="hero-tag">// Financial Risk Management System</p>
+  <h1>RISCO<br/><span>DBMS</span></h1>
+  <p class="hero-sub">A full-stack financial database management system for startups facing uncertainty — built with FastAPI, Oracle DB, and React.</p>
+  <div class="hero-cta">
+    <a href="https://github.com/AliRazaDev241/risco" target="_blank" class="btn btn-primary">View on GitHub ↗</a>
+    <a href="#install" class="btn btn-outline">Installation Guide</a>
+  </div>
+  <div class="hero-grid">
+    <div class="grid-cell lit"></div><div class="grid-cell"></div><div class="grid-cell lit"></div>
+    <div class="grid-cell"></div><div class="grid-cell lit"></div><div class="grid-cell"></div>
+    <div class="grid-cell lit"></div><div class="grid-cell lit"></div><div class="grid-cell"></div>
+    <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell lit"></div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- OVERVIEW -->
+<section id="overview">
+  <p class="section-label">01 — Overview</p>
+  <h2>What is RISCO?</h2>
+  <div class="overview-grid">
+    <div class="overview-card">
+      <h3>Organizational Hierarchy</h3>
+      <p>Manage financial data across a structured hierarchy: organizations → members → clients → revenue/expenses → risk alerts → snapshots.</p>
+    </div>
+    <div class="overview-card">
+      <h3>Risk Intelligence</h3>
+      <p>Automated risk alerts generated from financial thresholds, with planned predictive analysis using Base, Worst, and Best case financial snapshots.</p>
+    </div>
+    <div class="overview-card">
+      <h3>Predictive Analysis</h3>
+      <p>NumPy-powered financial snapshot calculations using client reliability scores, with ANN models via TensorFlow or Scikit-learn planned.</p>
+    </div>
+    <div class="overview-card">
+      <h3>Clean Architecture</h3>
+      <p>Monolithic 3-tier design with clean internal layering — routers → services → models — for high cohesion and low coupling.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- TECH STACK -->
+<section id="stack">
+  <p class="section-label">02 — Tech Stack</p>
+  <h2>Built with modern tooling</h2>
+  <div class="stack-grid">
+    <div class="stack-card">
+      <div class="stack-layer">Frontend</div>
+      <div class="stack-name">React</div>
+      <div class="stack-detail">Vite + Tailwind CSS (in progress)</div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-layer">Backend</div>
+      <div class="stack-name">FastAPI</div>
+      <div class="stack-detail">Python 3.11, SQLAlchemy ORM, Pydantic</div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-layer">Database</div>
+      <div class="stack-name">Oracle 21c</div>
+      <div class="stack-detail">Enterprise Edition, Pluggable DB</div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-layer">Analysis</div>
+      <div class="stack-name">NumPy</div>
+      <div class="stack-detail">TensorFlow / Scikit-learn (planned)</div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-layer">Migrations</div>
+      <div class="stack-name">Alembic</div>
+      <div class="stack-detail">Planned for future schema changes</div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-layer">Dev Tooling</div>
+      <div class="stack-name">Conda + GitHub CLI</div>
+      <div class="stack-detail">Environment and version control</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- ARCHITECTURE -->
+<section id="architecture">
+  <p class="section-label">03 — Architecture</p>
+  <h2>Monolithic 3-tier design</h2>
+  <div class="arch-box">
+    <div class="arch-flow">
+      <div class="arch-layer active">
+        <div class="arch-name">React Frontend</div>
+        <div class="arch-desc">Dashboard UI — login, org select, financial views</div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer active">
+        <div class="arch-name">FastAPI Backend</div>
+        <div class="arch-desc">HTTP layer, business logic, ORM, schemas</div>
+      </div>
+      <div class="arch-sub">
+        <span><em>routers/</em> — HTTP layer, request/response handling</span>
+        <span><em>services/</em> — Business logic</span>
+        <span><em>models/</em> — SQLAlchemy ORM (database layer)</span>
+        <span><em>schemas/</em> — Pydantic schemas (API layer)</span>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer active">
+        <div class="arch-name">Oracle Database 21c</div>
+        <div class="arch-desc">Pluggable Database: <code style="font-family:var(--mono);font-size:0.78rem;color:var(--accent)">orcl21pdb</code></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- SCHEMA -->
+<section id="schema">
+  <p class="section-label">04 — Database Schema</p>
+  <h2>9 tables, normalized to 4NF</h2>
+  <div class="schema-grid">
+    <div class="schema-card">
+      <div class="schema-table">Users</div>
+      <div class="schema-desc">System users with authentication info</div>
+    </div>
+    <div class="schema-card">
+      <div class="schema-table">Organization</div>
+      <div class="schema-desc">Top-level organizational entities</div>
+    </div>
+    <div class="schema-card">
+      <div class="schema-table">Roles</div>
+      <div class="schema-desc">Roles within an organization</div>
+    </div>
+    <div class="schema-card">
+      <div class="schema-table">OrganizationMembers</div>
+      <div class="schema-desc">Users linked to organizations with roles</div>
+    </div>
+    <div class="schema-card">
+      <div class="schema-table">Clients</div>
+      <div class="schema-desc">Clients belonging to an organization</div>
+    </div>
+    <div class="schema-card">
+      <div class="schema-table">Revenue</div>
+      <div class="schema-desc">Revenue records linked to clients</div>
+    </div>
+    <div class="schema-card">
+      <div class="schema-table">Expenses</div>
+      <div class="schema-desc">Expense records linked to organizations</div>
+    </div>
+    <div class="schema-card">
+      <div class="schema-table">RiskAlerts</div>
+      <div class="schema-desc">Alerts generated from financial thresholds</div>
+    </div>
+    <div class="schema-card">
+      <div class="schema-table">FinancialSnapshots</div>
+      <div class="schema-desc">Periodic summaries — Base / Worst / Best case</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- FEATURES -->
+<section id="features">
+  <p class="section-label">05 — Features</p>
+  <h2>Progress tracker</h2>
+  <div class="features-list">
+    <div class="feature-item">
+      <div class="feature-dot done"></div>
+      <div class="feature-text">CLI phase (Python + PostgreSQL) <span class="feature-badge badge-done">done</span></div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-dot done"></div>
+      <div class="feature-text">Oracle DB migration with full schema (9 tables, 1NF–4NF) <span class="feature-badge badge-done">done</span></div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-dot done"></div>
+      <div class="feature-text">SQLAlchemy ORM models for all entities <span class="feature-badge badge-done">done</span></div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-dot done"></div>
+      <div class="feature-text">Pydantic schemas (Create / Update / Response) for all entities <span class="feature-badge badge-done">done</span></div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-dot done"></div>
+      <div class="feature-text">FastAPI backend with router/service separation <span class="feature-badge badge-done">done</span></div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-dot done"></div>
+      <div class="feature-text">Structured logging (db.log, error.log) <span class="feature-badge badge-done">done</span></div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-dot wip"></div>
+      <div class="feature-text">Remaining routers and services <span class="feature-badge badge-wip">in progress</span></div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-dot wip"></div>
+      <div class="feature-text">React dashboard <span class="feature-badge badge-wip">in progress</span></div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-dot planned"></div>
+      <div class="feature-text">Predictive analysis — Base / Worst / Best case snapshots using NumPy <span class="feature-badge badge-planned">planned</span></div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-dot planned"></div>
+      <div class="feature-text">ANN model via TensorFlow or Scikit-learn <span class="feature-badge badge-planned">planned</span></div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-dot planned"></div>
+      <div class="feature-text">Alembic database migrations <span class="feature-badge badge-planned">planned</span></div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- INSTALL -->
+<section id="install">
+  <p class="section-label">06 — Installation</p>
+  <h2>Get it running locally</h2>
+
+  <p style="color:var(--muted);margin-bottom:2rem;font-size:0.9rem;">
+    Prerequisites: Python 3.11, Conda, Oracle Database 21c (with a configured Pluggable Database), Node.js (for React frontend), GitHub CLI (optional).
+  </p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-content">
+        <h4>Clone the repository</h4>
+        <pre>git clone https://github.com/AliRazaDev241/risco.git
+cd risco</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-content">
+        <h4>Create and activate the Conda environment</h4>
+        <pre>conda create -n risco python=3.11
+conda activate risco</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-content">
+        <h4>Install dependencies</h4>
+        <pre>pip install -r requirements.txt</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-content">
+        <h4>Configure environment variables</h4>
+        <pre>cp .env.example .env</pre>
+        <p class="note">Open <code style="font-family:var(--mono);font-size:0.8rem">.env</code> and fill in your Oracle credentials (see below).</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">05</div>
+      <div class="step-content">
+        <h4>Initialize the database</h4>
+        <pre>python init_db.py</pre>
+        <p class="note">Creates all tables in your Oracle PDB. Safe to re-run — only creates missing tables.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">06</div>
+      <div class="step-content">
+        <h4>Start the development server</h4>
+        <pre>uvicorn main:app --reload</pre>
+        <p class="note">API available at <code style="font-family:var(--mono);font-size:0.8rem">http://localhost:8000</code> — Swagger UI at <code style="font-family:var(--mono);font-size:0.8rem">/docs</code></p>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="font-family:var(--head);font-weight:600;margin:3rem 0 1rem;font-size:1.2rem;">Environment Variables</h3>
+  <div class="env-block">
+    <pre>DB_HOST=localhost
+DB_PORT=1521
+DB_SERVICE_NAME=orclpdb.bbrouter   # verify with: lsnrctl status
+DB_USER=risco
+DB_PASSWORD=your_password_here</pre>
+  </div>
+  <p class="note" style="margin-top:0.75rem;">⚠ Never commit your <code style="font-family:var(--mono);font-size:0.8rem">.env</code> file — it is already listed in <code style="font-family:var(--mono);font-size:0.8rem">.gitignore</code>.</p>
+</section>
+
+<hr class="divider"/>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-logo">RISCO</div>
+    <div class="footer-note" style="margin-top:0.3rem;">Financial Risk Management System</div>
+  </div>
+  <div style="display:flex;gap:1.5rem;align-items:center;">
+    <a href="https://github.com/AliRazaDev241/risco" target="_blank" class="btn btn-outline" style="padding:0.5rem 1rem;">GitHub ↗</a>
+    <span class="footer-note">Academic project · All rights reserved</span>
+  </div>
+</footer>
+
+</body>
+</html>
