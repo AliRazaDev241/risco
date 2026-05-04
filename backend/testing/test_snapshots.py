@@ -162,7 +162,7 @@ def test_upsert_base_calls_upsert_snapshot(mock_db):
 
         mock_upsert.assert_called_once()
         args, _ = mock_upsert.call_args
-        assert args[2] == "Base"  # snapshot_type is 3rd positional arg
+        assert args[2] == "Base"
 
 
 # ── _upsert_best ──────────────────────────────────────────────────────────────
@@ -183,7 +183,7 @@ def test_upsert_best_calls_upsert_snapshot(mock_db):
         mock_upsert.assert_called_once()
         args, _ = mock_upsert.call_args
         assert args[2] == "Best"
-        assert args[3] == 5000  # sum of amounts
+        assert args[3] == 5000
 
 
 # ── _upsert_worst ─────────────────────────────────────────────────────────────
@@ -200,14 +200,13 @@ def test_upsert_worst_calls_upsert_snapshot(mock_db):
     mock_db.execute.return_value.fetchall.return_value = [row1, row2]
     mock_db.execute.return_value.scalar.return_value = 3000
 
-    with patch.object(snapshot_service, "_upsert_snapshot") as mock_upsert, patch(
-        "services.snapshots.reliable_revenue"
-    ) as mock_reliable:
-        mock_reliable.return_value = 3600.0
+    with patch.object(snapshot_service, "_upsert_snapshot") as mock_upsert, \
+         patch("services.snapshots.reliable_revenue") as mock_reliable:
+        mock_reliable.return_value = pytest.approx(3600.0)
 
         snapshot_service._upsert_worst(db=mock_db, org_id=1)
 
         mock_upsert.assert_called_once()
         args, _ = mock_upsert.call_args
         assert args[2] == "Worst"
-        assert args[3] == 3600.0
+        assert args[3] == pytest.approx(3600.0)

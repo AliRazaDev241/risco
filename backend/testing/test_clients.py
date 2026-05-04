@@ -38,7 +38,7 @@ def test_add_client_success(mock_db, sample_client):
         contact_number="03001234567",
         reliability_score=80,
     )
-    result = client_service.add_client(client_data, mock_db)
+    client_service.add_client(client_data, mock_db)
     mock_db.add.assert_called_once()
     mock_db.commit.assert_called_once()
 
@@ -52,7 +52,7 @@ def test_add_client_without_contact_number(mock_db):
         contact_number=None,
         reliability_score=70,
     )
-    result = client_service.add_client(client_data, mock_db)
+    client_service.add_client(client_data, mock_db)
     mock_db.add.assert_called_once()
     mock_db.commit.assert_called_once()
 
@@ -75,7 +75,7 @@ def test_add_client_returns_new_client(mock_db, sample_client):
     assert created.reliability_score == 80
 
 
-def test_add_client_returns_new_client(mock_db):
+def test_add_client_db_commit(mock_db):
     mock_db.refresh = MagicMock()
     client_data = schema.ClientsCreate(
         organization_id=10,
