@@ -25,11 +25,11 @@ export default function Register() {
 
       if (response.ok) {
         alert("Account created! Please login.")
-        window.location.href = "/"
+        globalThis.location.href = "/"
       } else {
         setError(data.detail || "Registration failed")
       }
-    } catch (err) {
+    } catch {
       setError("Could not connect to server. Is the backend running?")
     } finally {
       setLoading(false)
@@ -58,8 +58,9 @@ export default function Register() {
         <form className="space-y-4" onSubmit={handleRegister}>
           <div className="flex gap-3">
             <div className="flex-1">
-              <label className="text-xs font-medium text-gray-500">First Name</label>
+              <label htmlFor="first_name" className="text-xs font-medium text-gray-500">First Name</label>
               <input
+                id="first_name"
                 type="text"
                 name="first_name"
                 placeholder="John"
@@ -69,8 +70,9 @@ export default function Register() {
               />
             </div>
             <div className="flex-1">
-              <label className="text-xs font-medium text-gray-500">Last Name</label>
+              <label htmlFor="last_name" className="text-xs font-medium text-gray-500">Last Name</label>
               <input
+                id="last_name"
                 type="text"
                 name="last_name"
                 placeholder="Doe"
@@ -82,8 +84,9 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="text-xs font-medium text-gray-500">Email</label>
+            <label htmlFor="email" className="text-xs font-medium text-gray-500">Email</label>
             <input
+              id="email"
               type="email"
               name="email"
               placeholder="name@risco.com"
@@ -94,8 +97,9 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="text-xs font-medium text-gray-500">Password</label>
+            <label htmlFor="password" className="text-xs font-medium text-gray-500">Password</label>
             <input
+              id="password"
               type="password"
               name="password"
               placeholder="••••••••"

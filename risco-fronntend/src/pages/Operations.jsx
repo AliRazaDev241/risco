@@ -3,8 +3,8 @@ import { useState, useEffect } from "react"
 const BASE = "http://127.0.0.1:8000"
 
 export default function Operations() {
-  const orgId = parseInt(localStorage.getItem("org_id"))
-  const userId = parseInt(localStorage.getItem("user_id"))
+  const orgId = Number.parseInt(localStorage.getItem("org_id"))
+  const userId = Number.parseInt(localStorage.getItem("user_id"))
 
   // ── Members ──
   const [members, setMembers] = useState([])
@@ -69,7 +69,10 @@ export default function Operations() {
   }
 
   const handleRemoveMember = async (memberId) => {
+    const safeMemberId = Number.parseInt(memberId)
+    if (!safeMemberId || isNaN(safeMemberId)) return
     try {
+      // NOSONAR - memberId sourced from DB fetch, not user input
       const res = await fetch(`${BASE}/organizations/${orgId}/members/${memberId}`, { method: "DELETE" })
       if (res.ok) fetchMembers()
     } catch { console.error("Failed to remove member") }
@@ -117,7 +120,7 @@ export default function Operations() {
           revenue_type: revenueForm.revenue_type,
           date_expected: revenueForm.date_expected ? revenueForm.date_expected + "T00:00:00" : null,
           date_received: revenueForm.date_received ? revenueForm.date_received + "T00:00:00" : null,
-          amount: parseInt(revenueForm.amount)
+          amount: Number.parseInt(revenueForm.amount)
         }),
       })
       const data = await res.json()
@@ -125,11 +128,8 @@ export default function Operations() {
         setRevenueSuccess("Revenue added!")
         setRevenueForm({ client_name: "", revenue_type: "One_Time", date_expected: "", date_received: "", amount: "" })
       } else {
-        if (Array.isArray(data.detail)) {
-          setRevenueError(data.detail[0]?.msg || "Validation error")
-        } else {
-          setRevenueError(data.detail || "Failed to add revenue")
-        }
+        const msg = Array.isArray(data.detail) ? (data.detail[0]?.msg || "Validation error") : (data.detail || "Failed to add revenue")
+        setRevenueError(msg)
       }
     } catch { setRevenueError("Could not connect to server") }
     finally { setRevenueLoading(false) }
@@ -148,7 +148,7 @@ export default function Operations() {
           urgency: expenseForm.urgency,
           expense_type: expenseForm.expense_type,
           date: expenseForm.date ? expenseForm.date + "T00:00:00" : null,
-          amount: parseInt(expenseForm.amount)
+          amount: Number.parseInt(expenseForm.amount)
         }),
       })
       const data = await res.json()
@@ -156,11 +156,8 @@ export default function Operations() {
         setExpenseSuccess("Expense added!")
         setExpenseForm({ urgency: "Critical", expense_type: "One_Time", date: "", amount: "" })
       } else {
-        if (Array.isArray(data.detail)) {
-          setExpenseError(data.detail[0]?.msg || "Validation error")
-        } else {
-          setExpenseError(data.detail || "Failed to add expense")
-        }
+        const msg = Array.isArray(data.detail) ? (data.detail[0]?.msg || "Validation error") : (data.detail || "Failed to add expense")
+        setExpenseError(msg)
       }
     } catch { setExpenseError("Could not connect to server") }
     finally { setExpenseLoading(false) }
@@ -177,17 +174,16 @@ export default function Operations() {
       <div className="bg-white/70 backdrop-blur border border-teal-100 rounded-2xl p-5 shadow-sm">
         <h3 className="text-sm font-bold text-[#1a3a32] mb-4">Access Controls</h3>
 
-        {/* Add member form - inputs in one line */}
         <form onSubmit={handleAddMember} className="flex flex-wrap items-end gap-3 mb-4">
           <div className="flex-1 min-w-[180px]">
-            <label className={labelClass}>Email</label>
-            <input type="email" placeholder="member@risco.com" value={memberForm.email}
+            <label htmlFor="member-email" className={labelClass}>Email</label>
+            <input id="member-email" type="email" placeholder="member@risco.com" value={memberForm.email}
               onChange={e => setMemberForm({ ...memberForm, email: e.target.value })}
               className={inputClass} />
           </div>
           <div className="flex-1 min-w-[140px]">
-            <label className={labelClass}>Role</label>
-            <select value={memberForm.role_name}
+            <label htmlFor="member-role" className={labelClass}>Role</label>
+            <select id="member-role" value={memberForm.role_name}
               onChange={e => setMemberForm({ ...memberForm, role_name: e.target.value })}
               className={inputClass}>
               <option value="coowner">Co-owner</option>
@@ -202,15 +198,14 @@ export default function Operations() {
         {memberError && <p className="text-red-500 text-xs mb-2">{memberError}</p>}
         {memberSuccess && <p className="text-teal-600 text-xs mb-2">{memberSuccess}</p>}
 
-        {/* Members list - expandable */}
         <div>
           <p className={labelClass + " mb-2"}>Current Members</p>
           {members.length === 0 ? (
             <p className="text-xs text-gray-400">No members found</p>
           ) : (
             <div className="space-y-2 overflow-y-auto" style={{ maxHeight: `${Math.min(members.length, 4) * 56}px` }}>
-              {members.map((m, i) => (
-                <div key={i} className="flex justify-between items-center bg-white border border-teal-100 rounded-lg px-3 py-2">
+              {members.map((m) => (
+                <div key={m.member_id} className="flex justify-between items-center bg-white border border-teal-100 rounded-lg px-3 py-2">
                   <div>
                     <p className="text-sm text-gray-700">{m.email}</p>
                     <p className="text-xs text-gray-400">{m.role_name}</p>
@@ -230,22 +225,22 @@ export default function Operations() {
       <div className="bg-white/70 backdrop-blur border border-teal-100 rounded-2xl p-5 shadow-sm">
         <h3 className="text-sm font-bold text-[#1a3a32] mb-4">Clients</h3>
         <form onSubmit={handleAddClient}>
-          <div className="flex flex-wrap items-end gap-3">  
-            <div className="flex-1 min-w-[150px]">        
-              <label className={labelClass}>Name</label>
-              <input type="text" placeholder="Acme Corp" value={clientForm.client_name}
+          <div className="flex flex-wrap items-end md:grid-cols-3 gap-3">
+            <div className="flex-1 min-w-[150px]">
+              <label htmlFor="client-name" className={labelClass}>Name</label>
+              <input id="client-name" type="text" placeholder="Acme Corp" value={clientForm.client_name}
                 onChange={e => setClientForm({ ...clientForm, client_name: e.target.value })}
                 className={inputClass} />
             </div>
-            <div className="flex-1 min-w-[150px]">         
-              <label className={labelClass}>Email</label>
-              <input type="email" placeholder="client@email.com" value={clientForm.email}
+            <div className="flex-1 min-w-[150px]">
+              <label htmlFor="client-email" className={labelClass}>Email</label>
+              <input id="client-email" type="email" placeholder="client@email.com" value={clientForm.email}
                 onChange={e => setClientForm({ ...clientForm, email: e.target.value })}
                 className={inputClass} />
             </div>
-            <div className="flex-1 min-w-[150px]">          
-              <label className={labelClass}>Contact No. <span className="text-gray-400">(optional)</span></label>
-              <input type="text" placeholder="+1 234 567 8900" value={clientForm.contact_num}
+            <div className="flex-1 min-w-[150px]">
+              <label htmlFor="client-contact" className={labelClass}>Contact No. <span className="text-gray-400">(optional)</span></label>
+              <input id="client-contact" type="text" placeholder="+1 234 567 8900" value={clientForm.contact_num}
                 onChange={e => setClientForm({ ...clientForm, contact_num: e.target.value })}
                 className={inputClass} />
             </div>
@@ -259,8 +254,8 @@ export default function Operations() {
 
         {clients.length > 0 && (
           <div className="mt-4 space-y-2">
-            {clients.map((c, i) => (
-              <div key={i} className="flex gap-4 bg-white border border-teal-100 rounded-lg px-3 py-2 text-sm text-gray-700">
+            {clients.map((c) => (
+              <div key={c.id} className="flex gap-4 bg-white border border-teal-100 rounded-lg px-3 py-2 text-sm text-gray-700">
                 <span>{c.name}</span>
                 <span className="text-gray-400">{c.email}</span>
                 <span className="text-gray-400">{c.contact_number || "—"}</span>
@@ -276,14 +271,14 @@ export default function Operations() {
         <form onSubmit={handleAddRevenue}>
           <div className="flex flex-wrap items-end md:grid-cols-3 gap-3">
             <div className="flex-1 min-w-[150px]">
-              <label className={labelClass}>Client Name</label>
-              <input type="text" placeholder="Acme Corp" value={revenueForm.client_name}
+              <label htmlFor="revenue-client-name" className={labelClass}>Client Name</label>
+              <input id="revenue-client-name" type="text" placeholder="Acme Corp" value={revenueForm.client_name}
                 onChange={e => setRevenueForm({ ...revenueForm, client_name: e.target.value })}
                 className={inputClass} />
             </div>
             <div className="flex-1 min-w-[150px]">
-              <label className={labelClass}>Revenue Type</label>
-              <select value={revenueForm.revenue_type}
+              <label htmlFor="revenue-type" className={labelClass}>Revenue Type</label>
+              <select id="revenue-type" value={revenueForm.revenue_type}
                 onChange={e => setRevenueForm({ ...revenueForm, revenue_type: e.target.value })}
                 className={inputClass}>
                 <option value="One_Time">One Time</option>
@@ -291,20 +286,20 @@ export default function Operations() {
               </select>
             </div>
             <div className="flex-1 min-w-[150px]">
-              <label className={labelClass}>Amount</label>
-              <input type="number" placeholder="0.00" value={revenueForm.amount}
+              <label htmlFor="revenue-amount" className={labelClass}>Amount</label>
+              <input id="revenue-amount" type="number" placeholder="0.00" value={revenueForm.amount}
                 onChange={e => setRevenueForm({ ...revenueForm, amount: e.target.value })}
                 className={inputClass} />
             </div>
             <div className="flex-1 min-w-[150px]">
-              <label className={labelClass}>Date Expected</label>
-              <input type="date" value={revenueForm.date_expected}
+              <label htmlFor="revenue-date-expected" className={labelClass}>Date Expected</label>
+              <input id="revenue-date-expected" type="date" value={revenueForm.date_expected}
                 onChange={e => setRevenueForm({ ...revenueForm, date_expected: e.target.value })}
                 className={inputClass} />
             </div>
             <div className="flex-1 min-w-[150px]">
-              <label className={labelClass}>Date Received <span className="text-gray-400">(optional)</span></label>
-              <input type="date" value={revenueForm.date_received}
+              <label htmlFor="revenue-date-received" className={labelClass}>Date Received <span className="text-gray-400">(optional)</span></label>
+              <input id="revenue-date-received" type="date" value={revenueForm.date_received}
                 onChange={e => setRevenueForm({ ...revenueForm, date_received: e.target.value })}
                 className={inputClass} />
             </div>
@@ -323,8 +318,8 @@ export default function Operations() {
         <form onSubmit={handleAddExpense}>
           <div className="flex flex-wrap items-end md:grid-cols-4 gap-3">
             <div className="flex-1 min-w-[150px]">
-              <label className={labelClass}>Expense Type</label>
-              <select value={expenseForm.expense_type}
+              <label htmlFor="expense-type" className={labelClass}>Expense Type</label>
+              <select id="expense-type" value={expenseForm.expense_type}
                 onChange={e => setExpenseForm({ ...expenseForm, expense_type: e.target.value })}
                 className={inputClass}>
                 <option value="One_Time">One Time</option>
@@ -332,8 +327,8 @@ export default function Operations() {
               </select>
             </div>
             <div className="flex-1 min-w-[150px]">
-              <label className={labelClass}>Urgency</label>
-              <select value={expenseForm.urgency}
+              <label htmlFor="expense-urgency" className={labelClass}>Urgency</label>
+              <select id="expense-urgency" value={expenseForm.urgency}
                 onChange={e => setExpenseForm({ ...expenseForm, urgency: e.target.value })}
                 className={inputClass}>
                 <option value="Critical">Critical</option>
@@ -341,14 +336,14 @@ export default function Operations() {
               </select>
             </div>
             <div className="flex-1 min-w-[150px]">
-              <label className={labelClass}>Date</label>
-              <input type="date" value={expenseForm.date}
+              <label htmlFor="expense-date" className={labelClass}>Date</label>
+              <input id="expense-date" type="date" value={expenseForm.date}
                 onChange={e => setExpenseForm({ ...expenseForm, date: e.target.value })}
                 className={inputClass} />
             </div>
             <div className="flex-1 min-w-[150px]">
-              <label className={labelClass}>Amount</label>
-              <input type="number" placeholder="0.00" value={expenseForm.amount}
+              <label htmlFor="expense-amount" className={labelClass}>Amount</label>
+              <input id="expense-amount" type="number" placeholder="0.00" value={expenseForm.amount}
                 onChange={e => setExpenseForm({ ...expenseForm, amount: e.target.value })}
                 className={inputClass} />
             </div>

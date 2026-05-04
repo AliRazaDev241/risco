@@ -1,9 +1,197 @@
 import { useState, useEffect } from "react"
+import PropTypes from 'prop-types'
 
 const BASE = "http://127.0.0.1:8000"
 
+// ── Gauge ──
+const Gauge = ({ score }) => {
+  const size = 180, cx = 90, cy = 90, r = 72, stroke = 14
+  const start = Math.PI * 0.8, end = Math.PI * 2.2
+  const pct = Math.min(Math.max(score / 100, 0), 1)
+  const angle = start + pct * (end - start)
+  const polar = (a, radius) => [cx + radius * Math.cos(a), cy + radius * Math.sin(a)]
+  const arc = (a1, a2, radius) => {
+    const [x1, y1] = polar(a1, radius)
+    const [x2, y2] = polar(a2, radius)
+    const large = (a2 - a1) > Math.PI ? 1 : 0
+    return `M ${x1} ${y1} A ${radius} ${radius} 0 ${large} 1 ${x2} ${y2}`
+  }
+  let color
+  if (score >= 70) color = "#1D9E75"
+  else if (score >= 40) color = "#BA7517"
+  else color = "#E24B4A"
+
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <path d={arc(start, end, r)} fill="none" stroke="#e5e7eb" strokeWidth={stroke} strokeLinecap="round"/>
+      {pct > 0 && <path d={arc(start, angle, r)} fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="round"/>}
+      <text x={cx} y={cy - 6} textAnchor="middle" fontSize="28" fontWeight="500" fill={color}>{score.toFixed(0)}</text>
+      <text x={cx} y={cy + 14} textAnchor="middle" fontSize="11" fill="#6b7280">out of 100</text>
+    </svg>
+  )
+}
+
+Gauge.propTypes = {
+  score: PropTypes.number.isRequired,
+}
+
+// ── Pagination ──
+const Pagination = ({ page, total, onPrev, onNext }) => (
+  <div className="flex items-center justify-between mt-3 pt-2 border-t border-teal-50">
+    <button onClick={onPrev} disabled={page <= 1}
+      className="text-xs text-teal-700 disabled:text-gray-300 hover:underline">← Prev</button>
+    <span className="text-xs text-gray-400">{page} / {total}</span>
+    <button onClick={onNext} disabled={page >= total}
+      className="text-xs text-teal-700 disabled:text-gray-300 hover:underline">Next →</button>
+  </div>
+)
+
+Pagination.propTypes = {
+  page: PropTypes.number.isRequired,
+  total: PropTypes.number.isRequired,
+  onPrev: PropTypes.func.isRequired,
+  onNext: PropTypes.func.isRequired,
+}
+
+// ── Revenue Table ──
+const RevenueTable = ({ items, type, page, totalPages, onPageChange, editingId, editDate, setEditDate, setEditingId, patchLoading, handlePatchDate, fmt, fmtDate, thClass, tdClass }) => (
+  <div className="bg-white/70 backdrop-blur border border-teal-100 rounded-2xl p-5 shadow-sm">
+    <h3 className="text-sm font-bold text-[#1a3a32] mb-4">
+      {type === "Recurring" ? "Recurring Revenue" : "One Time Revenue"}
+    </h3>
+    {items.length === 0 ? (
+      <p className="text-xs text-gray-400">No entries found</p>
+    ) : (
+      <table className="w-full">
+        <thead>
+          <tr>
+            <th className={thClass}>Client</th>
+            <th className={thClass}>Expected</th>
+            <th className={thClass}>Received</th>
+            <th className={thClass}>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((item) => (
+            <tr key={item.id} className="border-t border-teal-50">
+              <td className={tdClass}>
+                <p>{item.client_name}</p>
+                <p className="text-gray-400">{item.client_email}</p>
+              </td>
+              <td className={tdClass}>{fmtDate(item.date_expected)}</td>
+              <td className={tdClass}>
+                {editingId === item.id ? (
+                  <div className="flex items-center gap-1">
+                    <input type="date" value={editDate}
+                      onChange={e => setEditDate(e.target.value)}
+                      className="text-xs border border-teal-200 rounded px-1 py-0.5"/>
+                    <button onClick={() => handlePatchDate(item.id, type)}
+                      disabled={patchLoading}
+                      className="text-xs text-teal-600 hover:underline">
+                      {patchLoading ? "..." : "Save"}
+                    </button>
+                    <button onClick={() => setEditingId(null)}
+                      className="text-xs text-gray-400 hover:underline">Cancel</button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => { setEditingId(item.id); setEditDate("") }}
+                    className={`cursor-pointer bg-transparent border-none p-0 ${item.date_received ? "text-gray-700" : "text-teal-500 hover:underline"}`}>
+                    {item.date_received
+                      ? new Date(item.date_received).toLocaleDateString()
+                      : "Set date"}
+                  </button>
+                )}
+              </td>
+              <td className={tdClass + " font-medium"}>{fmt(item.amount)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+    <Pagination
+      page={page} total={totalPages}
+      onPrev={() => onPageChange(page - 1)}
+      onNext={() => onPageChange(page + 1)}
+    />
+  </div>
+)
+
+RevenueTable.propTypes = {
+  items: PropTypes.array.isRequired,
+  type: PropTypes.string.isRequired,
+  page: PropTypes.number.isRequired,
+  totalPages: PropTypes.number.isRequired,
+  onPageChange: PropTypes.func.isRequired,
+  editingId: PropTypes.number,
+  editDate: PropTypes.string.isRequired,
+  setEditDate: PropTypes.func.isRequired,
+  setEditingId: PropTypes.func.isRequired,
+  patchLoading: PropTypes.bool.isRequired,
+  handlePatchDate: PropTypes.func.isRequired,
+  fmt: PropTypes.func.isRequired,
+  fmtDate: PropTypes.func.isRequired,
+  thClass: PropTypes.string.isRequired,
+  tdClass: PropTypes.string.isRequired,
+}
+
+// ── Expense Table ──
+const ExpenseTable = ({ items, type, page, totalPages, onPageChange, fmt, fmtDate, thClass, tdClass }) => (
+  <div className="bg-white/70 backdrop-blur border border-teal-100 rounded-2xl p-5 shadow-sm">
+    <h3 className="text-sm font-bold text-[#1a3a32] mb-4">
+      {type === "Recurring" ? "Recurring Expenses" : "One Time Expenses"}
+    </h3>
+    {items.length === 0 ? (
+      <p className="text-xs text-gray-400">No entries found</p>
+    ) : (
+      <table className="w-full">
+        <thead>
+          <tr>
+            <th className={thClass}>Urgency</th>
+            <th className={thClass}>Date</th>
+            <th className={thClass}>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((item) => (
+            <tr key={item.id} className="border-t border-teal-50">
+              <td className={tdClass}>
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                  item.urgency === "Critical"
+                    ? "bg-red-50 text-red-500"
+                    : "bg-gray-100 text-gray-500"
+                }`}>{item.urgency}</span>
+              </td>
+              <td className={tdClass}>{fmtDate(item.date)}</td>
+              <td className={tdClass + " font-medium"}>{fmt(item.amount)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+    <Pagination
+      page={page} total={totalPages}
+      onPrev={() => onPageChange(page - 1)}
+      onNext={() => onPageChange(page + 1)}
+    />
+  </div>
+)
+
+ExpenseTable.propTypes = {
+  items: PropTypes.array.isRequired,
+  type: PropTypes.string.isRequired,
+  page: PropTypes.number.isRequired,
+  totalPages: PropTypes.number.isRequired,
+  onPageChange: PropTypes.func.isRequired,
+  fmt: PropTypes.func.isRequired,
+  fmtDate: PropTypes.func.isRequired,
+  thClass: PropTypes.string.isRequired,
+  tdClass: PropTypes.string.isRequired,
+}
+
 export default function FinancialIntelligence() {
-  const orgId = parseInt(localStorage.getItem("org_id"))
+  const orgId = Number.parseInt(localStorage.getItem("org_id"))
 
   // ── Metrics State ──
   const [metrics, setMetrics] = useState(null)
@@ -126,148 +314,8 @@ export default function FinancialIntelligence() {
   }
 
   // ── Shared styles ──
-  const labelClass = "text-xs text-gray-500 uppercase tracking-wide font-medium"
   const thClass = "text-xs text-gray-400 font-medium text-left pb-2"
   const tdClass = "text-xs text-gray-700 py-2 pr-3"
-
-  // ── Gauge ──
-  const Gauge = ({ score }) => {
-    const size = 180, cx = 90, cy = 90, r = 72, stroke = 14
-    const start = Math.PI * 0.8, end = Math.PI * 2.2
-    const pct = Math.min(Math.max(score / 100, 0), 1)
-    const angle = start + pct * (end - start)
-    const polar = (a, radius) => [cx + radius * Math.cos(a), cy + radius * Math.sin(a)]
-    const arc = (a1, a2, radius) => {
-      const [x1, y1] = polar(a1, radius)
-      const [x2, y2] = polar(a2, radius)
-      const large = (a2 - a1) > Math.PI ? 1 : 0
-      return `M ${x1} ${y1} A ${radius} ${radius} 0 ${large} 1 ${x2} ${y2}`
-    }
-    const color = score >= 70 ? "#1D9E75" : score >= 40 ? "#BA7517" : "#E24B4A"
-    return (
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        <path d={arc(start, end, r)} fill="none" stroke="#e5e7eb" strokeWidth={stroke} strokeLinecap="round"/>
-        {pct > 0 && <path d={arc(start, angle, r)} fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="round"/>}
-        <text x={cx} y={cy - 6} textAnchor="middle" fontSize="28" fontWeight="500" fill={color}>{score.toFixed(0)}</text>
-        <text x={cx} y={cy + 14} textAnchor="middle" fontSize="11" fill="#6b7280">out of 100</text>
-      </svg>
-    )
-  }
-
-  // ── Pagination ──
-  const Pagination = ({ page, total, onPrev, onNext }) => (
-    <div className="flex items-center justify-between mt-3 pt-2 border-t border-teal-50">
-      <button onClick={onPrev} disabled={page <= 1}
-        className="text-xs text-teal-700 disabled:text-gray-300 hover:underline">← Prev</button>
-      <span className="text-xs text-gray-400">{page} / {total}</span>
-      <button onClick={onNext} disabled={page >= total}
-        className="text-xs text-teal-700 disabled:text-gray-300 hover:underline">Next →</button>
-    </div>
-  )
-
-  // ── Revenue Table ──
-  const RevenueTable = ({ items, type, page, totalPages, onPageChange }) => (
-    <div className="bg-white/70 backdrop-blur border border-teal-100 rounded-2xl p-5 shadow-sm">
-      <h3 className="text-sm font-bold text-[#1a3a32] mb-4">
-        {type === "Recurring" ? "Recurring Revenue" : "One Time Revenue"}
-      </h3>
-      {items.length === 0 ? (
-        <p className="text-xs text-gray-400">No entries found</p>
-      ) : (
-        <table className="w-full">
-          <thead>
-            <tr>
-              <th className={thClass}>Client</th>
-              <th className={thClass}>Expected</th>
-              <th className={thClass}>Received</th>
-              <th className={thClass}>Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item) => (
-              <tr key={item.id} className="border-t border-teal-50">
-                <td className={tdClass}>
-                  <p>{item.client_name}</p>
-                  <p className="text-gray-400">{item.client_email}</p>
-                </td>
-                <td className={tdClass}>{fmtDate(item.date_expected)}</td>
-                <td className={tdClass}>
-                  {editingId === item.id ? (
-                    <div className="flex items-center gap-1">
-                      <input type="date" value={editDate}
-                        onChange={e => setEditDate(e.target.value)}
-                        className="text-xs border border-teal-200 rounded px-1 py-0.5"/>
-                      <button onClick={() => handlePatchDate(item.id, type)}
-                        disabled={patchLoading}
-                        className="text-xs text-teal-600 hover:underline">
-                        {patchLoading ? "..." : "Save"}
-                      </button>
-                      <button onClick={() => setEditingId(null)}
-                        className="text-xs text-gray-400 hover:underline">Cancel</button>
-                    </div>
-                  ) : (
-                    <span
-                      onClick={() => { setEditingId(item.id); setEditDate("") }}
-                      className={`cursor-pointer ${item.date_received ? "text-gray-700" : "text-teal-500 hover:underline"}`}>
-                      {fmtDate(item.date_received) || "Set date"}
-                    </span>
-                  )}
-                </td>
-                <td className={tdClass + " font-medium"}>{fmt(item.amount)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-      <Pagination
-        page={page} total={totalPages}
-        onPrev={() => onPageChange(page - 1)}
-        onNext={() => onPageChange(page + 1)}
-      />
-    </div>
-  )
-
-  // ── Expense Table ──
-  const ExpenseTable = ({ items, type, page, totalPages, onPageChange }) => (
-    <div className="bg-white/70 backdrop-blur border border-teal-100 rounded-2xl p-5 shadow-sm">
-      <h3 className="text-sm font-bold text-[#1a3a32] mb-4">
-        {type === "Recurring" ? "Recurring Expenses" : "One Time Expenses"}
-      </h3>
-      {items.length === 0 ? (
-        <p className="text-xs text-gray-400">No entries found</p>
-      ) : (
-        <table className="w-full">
-          <thead>
-            <tr>
-              <th className={thClass}>Urgency</th>
-              <th className={thClass}>Date</th>
-              <th className={thClass}>Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item, i) => (
-              <tr key={i} className="border-t border-teal-50">
-                <td className={tdClass}>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                    item.urgency === "Critical"
-                      ? "bg-red-50 text-red-500"
-                      : "bg-gray-100 text-gray-500"
-                  }`}>{item.urgency}</span>
-                </td>
-                <td className={tdClass}>{fmtDate(item.date)}</td>
-                <td className={tdClass + " font-medium"}>{fmt(item.amount)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-      <Pagination
-        page={page} total={totalPages}
-        onPrev={() => onPageChange(page - 1)}
-        onNext={() => onPageChange(page + 1)}
-      />
-    </div>
-  )
 
   // ── Render ──
   return (
@@ -324,11 +372,19 @@ export default function FinancialIntelligence() {
               items={recurringRevenue} type="Recurring"
               page={recurringRevPage} totalPages={recurringRevTotalPages}
               onPageChange={(p) => { setRecurringRevPage(p); fetchRevenue("Recurring", p) }}
+              editingId={editingId} editDate={editDate}
+              setEditDate={setEditDate} setEditingId={setEditingId}
+              patchLoading={patchLoading} handlePatchDate={handlePatchDate}
+              fmt={fmt} fmtDate={fmtDate} thClass={thClass} tdClass={tdClass}
             />
             <RevenueTable
               items={oneTimeRevenue} type="One_Time"
               page={oneTimeRevPage} totalPages={oneTimeRevTotalPages}
               onPageChange={(p) => { setOneTimeRevPage(p); fetchRevenue("One_Time", p) }}
+              editingId={editingId} editDate={editDate}
+              setEditDate={setEditDate} setEditingId={setEditingId}
+              patchLoading={patchLoading} handlePatchDate={handlePatchDate}
+              fmt={fmt} fmtDate={fmtDate} thClass={thClass} tdClass={tdClass}
             />
           </div>
 
@@ -338,11 +394,13 @@ export default function FinancialIntelligence() {
               items={recurringExp} type="Recurring"
               page={recurringExpPage} totalPages={recurringExpTotalPages}
               onPageChange={(p) => { setRecurringExpPage(p); fetchExpenses("Recurring", p) }}
+              fmt={fmt} fmtDate={fmtDate} thClass={thClass} tdClass={tdClass}
             />
             <ExpenseTable
               items={oneTimeExp} type="One_Time"
               page={oneTimeExpPage} totalPages={oneTimeExpTotalPages}
               onPageChange={(p) => { setOneTimeExpPage(p); fetchExpenses("One_Time", p) }}
+              fmt={fmt} fmtDate={fmtDate} thClass={thClass} tdClass={tdClass}
             />
           </div>
 

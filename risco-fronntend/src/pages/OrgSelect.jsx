@@ -8,6 +8,11 @@ export default function OrgSelect() {
 
   const userId = localStorage.getItem("user_id")
 
+  const getSubmitLabel = () => {
+    if (loading) return "Please wait..."
+    return mode === "join" ? "Join Organization" : "Create Organization"
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError("")
@@ -24,14 +29,13 @@ export default function OrgSelect() {
         const response = await fetch("http://127.0.0.1:8000/organizations/join", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ org_name: orgName, user_id: parseInt(userId) }),
+          body: JSON.stringify({ org_name: orgName, user_id: Number.parseInt(userId) }),
         })
         const data = await response.json()
         if (response.ok) {
-          // localStorage.setItem("org", data.org_name)
           localStorage.setItem("org", data.org_name)
           localStorage.setItem("org_id", data.id)
-          window.location.href = "/dashboard"
+          globalThis.location.href = "/dashboard"
         } else {
           setError(data.detail || "Could not join organization")
         }
@@ -44,15 +48,14 @@ export default function OrgSelect() {
         })
         const data = await response.json()
         if (response.ok) {
-          // localStorage.setItem("org", data.org_name)
           localStorage.setItem("org", data.org_name)
           localStorage.setItem("org_id", data.id)
-          window.location.href = "/dashboard"
+          globalThis.location.href = "/dashboard"
         } else {
           setError(data.detail || "Could not create organization")
         }
       }
-    } catch (err) {
+    } catch {
       setError("Could not connect to server. Is the backend running?")
     } finally {
       setLoading(false)
@@ -96,7 +99,7 @@ export default function OrgSelect() {
               Create an Organization
             </button>
             <button
-              onClick={() => window.location.href = "/"}
+              onClick={() => { globalThis.location.href = "/" }}
               className="w-full py-2 text-xs text-gray-400 hover:text-teal-700 transition-colors"
             >
               ← Back to Login
@@ -134,7 +137,7 @@ export default function OrgSelect() {
               disabled={loading}
               className="w-3/4 mx-auto block py-3 rounded-lg bg-teal-700 text-white font-semibold text-sm tracking-widest uppercase hover:bg-teal-600 transition-all duration-300 shadow-md hover:shadow-teal-300/50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Please wait..." : mode === "join" ? "Join Organization" : "Create Organization"}
+              {getSubmitLabel()}
             </button>
           </form>
         )}

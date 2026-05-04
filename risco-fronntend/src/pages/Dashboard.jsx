@@ -3,6 +3,7 @@ import { Chart, registerables } from "chart.js"
 Chart.register(...registerables)
 import Operations from "./Operations"
 import FinancialIntelligence from "./FinancialIntelligence"
+import PropTypes from 'prop-types'
 
 const BASE = "http://127.0.0.1:8000"
 
@@ -12,6 +13,10 @@ const navItems = [
   { id: "operations", label: "Operations" },
 ];
 
+SnapshotGraph.propTypes = {
+  orgId: PropTypes.number.isRequired,
+  active: PropTypes.string.isRequired,
+}
 
 function SnapshotGraph({ orgId, active }) {
   const chartRef = useRef(null)
@@ -31,7 +36,6 @@ function SnapshotGraph({ orgId, active }) {
   const [dateRangeMax, setDateRangeMax] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const [activePoint, setActivePoint] = useState(null)
 
   const snapshotTypes = ["Base", "Best", "Worst"]
   const lineColors = {
@@ -44,6 +48,11 @@ function SnapshotGraph({ orgId, active }) {
     cash_balance: "Cash Balance",
     monthly_revenue: "Monthly Revenue",
     monthly_expense: "Monthly Expense",
+  }
+
+  const getPointValue = (data, date) => {
+    const point = (data || []).find(d => d.snapshot_date.split("T")[0] === date)
+    return point ? point.value : null
   }
 
   const fetchData = async (types) => {
@@ -72,14 +81,11 @@ function SnapshotGraph({ orgId, active }) {
 
       const allDates = [...new Set(
         results.flatMap(r => (r.data || []).map(d => d.snapshot_date.split("T")[0]))
-      )].sort()
+      )].sort((a, b) => new Date(a) - new Date(b))
 
       const datasets = results.map(r => ({
         label: r.type,
-        data: allDates.map(date => {
-          const point = (r.data || []).find(d => d.snapshot_date.split("T")[0] === date)
-          return point ? point.value : null
-        }),
+        data: allDates.map(date => getPointValue(r.data, date)),
         borderColor: lineColors[r.type].border,
         backgroundColor: lineColors[r.type].bg,
         borderWidth: 2.5,
@@ -142,9 +148,9 @@ function SnapshotGraph({ orgId, active }) {
             ticks: {
               font: { size: 11 },
               color: "#9ca3af",
-              autoSkip: true,          // ← add this
-              maxTicksLimit: 12,        // ← add this — shows max 12 labels
-              callback: (_, i, vals) => {
+              autoSkip: true,
+              maxTicksLimit: 12,
+              callback: (_, i) => {
                 const label = chartInstance.current?.data.labels[i]
                 if (!label) return ""
                 const d = new Date(label)
@@ -172,16 +178,16 @@ function SnapshotGraph({ orgId, active }) {
   }
 
   useEffect(() => {
-  if (active !== "overview") return
-  const types = snapshotType === "All" ? snapshotTypes : [snapshotType]
-  fetchData(types)
-  return () => {
-    if (chartInstance.current) {
-      chartInstance.current.destroy()
-      chartInstance.current = null
+    if (active !== "overview") return
+    const types = snapshotType === "All" ? snapshotTypes : [snapshotType]
+    fetchData(types)
+    return () => {
+      if (chartInstance.current) {
+        chartInstance.current.destroy()
+        chartInstance.current = null
+      }
     }
-  }
-}, [snapshotType, metricType, startDate, endDate, active])
+  }, [snapshotType, metricType, startDate, endDate, active])
 
   return (
     <div className="mt-6 bg-white/80 backdrop-blur border border-teal-100 rounded-2xl shadow-sm overflow-hidden">
@@ -271,7 +277,7 @@ function SnapshotGraph({ orgId, active }) {
           </div>
         )}
         <div style={{ position: "relative", height: "300px" }}>
-          <canvas ref={chartRef} role="img" aria-label="Financial snapshot line chart"/>
+          <canvas ref={chartRef} aria-label="Financial snapshot line chart" />
         </div>
         <p className="text-xs text-gray-300 text-center mt-3 tracking-wide uppercase">
           {metricLabels[metricType]} · Monthly Snapshots
@@ -283,7 +289,7 @@ function SnapshotGraph({ orgId, active }) {
 
 export default function Dashboard() {
   const [active, setActive] = useState("overview");
-  const orgId = parseInt(localStorage.getItem("org_id"))
+  const orgId = Number.parseInt(localStorage.getItem("org_id"))
 
   // ── Dashboard Metrics State ──
   const [dashMetrics, setDashMetrics] = useState(null)
@@ -316,13 +322,6 @@ export default function Dashboard() {
   const fmtRunway = (months) => {
     if (months === null || months === undefined) return "—"
     return months.toFixed(1) + " months"
-  }
-
-  const fmtRunwayDate = (months) => {
-    if (months === null || months === undefined) return "—"
-    const d = new Date()
-    d.setMonth(d.getMonth() + Math.round(months))
-    return d.toLocaleString("default", { month: "short", year: "numeric" })
   }
 
   const metrics = dashMetrics ? [
@@ -371,7 +370,7 @@ export default function Dashboard() {
         <button
           onClick={() => {
             localStorage.clear()
-            window.location.href = "/"
+            globalThis.location.href = "/"
           }}
           className="w-full text-left px-3 py-2.5 rounded-lg text-sm text-red-400 hover:bg-red-50 hover:text-red-500 transition-all duration-200">
           Logout
@@ -411,9 +410,7 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* Graph — add this */}
             <SnapshotGraph orgId={orgId} active={active} />
-
           </div>
         )}
 
