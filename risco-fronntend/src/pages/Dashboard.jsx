@@ -279,7 +279,7 @@ function SnapshotGraph({ orgId, active }) {
         <div style={{ position: "relative", height: "300px" }}>
           <canvas ref={chartRef} aria-label="Financial snapshot line chart" />
         </div>
-        <p className="text-xs text-gray-300 text-center mt-3 tracking-wide uppercase">
+        <p className="text-xs text-gray-400 text-center mt-3 tracking-wide uppercase">
           {metricLabels[metricType]} · Monthly Snapshots
         </p>
       </div>

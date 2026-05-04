@@ -63,7 +63,7 @@ export default function OrgSelect() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#e8efec] to-[#d0e0da] px-4">
+    <div className="relative h-screen overflow-hidden flex items-center justify-center bg-gradient-to-br from-[#e8efec] to-[#d0e0da] px-4">
 
       <div className="absolute w-[400px] h-[400px] border-2 border-teal-600/20 rounded-full top-[-80px] left-[-80px]" />
       <div className="absolute w-[200px] h-[200px] border-2 border-teal-600/20 rounded-full bottom-[60px] right-[-40px]" />
