@@ -55,12 +55,6 @@
 
 ## Clients
 
-### [SEVERITY: High] — Missing reliability_score on client creation
-- **Source:** undocumented — found during scan
-- **Location:** `backend/services/clients.py`, `add_client`
-- **What's wrong:** The `add_client` service function creates a `Clients` record without providing a value for `reliability_score`. However, the `Clients` model defines `reliability_score = Column(Integer, nullable=False)` without a default value.
-- **Why it matters:** Every attempt to create a new client will crash with a database `IntegrityError` (`NOT NULL constraint failed`), completely breaking the core feature of adding clients.
-- **Proposed fix:** Provide a default value during creation in `services/clients.py` (e.g., `reliability_score=100`) or set `default=100` on the SQLAlchemy model column.
 
 ### [SEVERITY: Medium] — Add Client Page Routers
 - **Source:** GitHub issue #8 (valid)
@@ -71,12 +65,6 @@
 
 ## Revenue
 
-### [SEVERITY: High] — Add Revenue bug
-- **Source:** GitHub issue #21 (valid)
-- **Location:** `backend/services/revenue.py`, `add_revenue`
-- **What's wrong:** `add_revenue` queries the client by `client_name` only.
-- **Why it matters:** If two clients in the same organization share a name, the query might return the wrong one, corrupting financial attribution.
-- **Proposed fix:** Update the query to filter by `clients.email` instead of or in addition to `clients.name`.
 
 ### [SEVERITY: Medium] — Revenue and Expenses Data Type
 - **Source:** GitHub issue #17 (valid)
@@ -96,19 +84,6 @@
 
 ## FinancialSnapshots
 
-### [SEVERITY: High] — cash_balance resets negative balances to monthly net
-- **Source:** undocumented — found during scan
-- **Location:** `backend/services/calculations.py`, `cash_balance`
-- **What's wrong:** The `cash_balance` function sets the `previous` balance to `0.0` if `cash_balance_previous < 0`. This effectively causes the new balance to become simply `monthly_revenue - monthly_expenses`, silently wiping out any prior accumulated debt/negative balance.
-- **Why it matters:** Startups or organizations running a deficit (negative cash balance) will see their balance artificially reset to 0 at the start of each month, presenting a completely false, inflated financial runway to users.
-- **Proposed fix:** Remove the `and cash_balance_previous >= 0` check. Allow `previous` to be negative so debt properly carries forward.
-
-### [SEVERITY: Critical] — Refactor Snapshot page logic
-- **Source:** GitHub issue #6 (valid)
-- **Location:** `backend/services/snapshots.py`, `_upsert_best` and `_upsert_worst`
-- **What's wrong:** The worst and best case calculations are inaccurate. For example, best case only includes 'Non-Critical' expenses and neither best nor worst cases carry forward the previous cash balance (they just do `monthly_revenue - monthly_expenses`).
-- **Why it matters:** The projections shown to users for Best/Worst cases are mathematically invalid and fundamentally misrepresent the company's financial runway.
-- **Proposed fix:** Fix the queries to properly categorize critical/non-critical expenses and reuse the `cash_balance` carry-forward logic from `Base` snapshot.
 
 ### [SEVERITY: High] — Background and Scheduled Tasks
 - **Source:** GitHub issue #9 (valid)
@@ -126,19 +101,6 @@
 
 ## Financial Intelligence
 
-### [SEVERITY: High] — Dashboard cash balance fetches wrong snapshot type
-- **Source:** undocumented — found during scan
-- **Location:** `backend/services/financial.py`, `get_dashboard_metrics`
-- **What's wrong:** The query to fetch `prev_balance` from `financial_snapshots` simply orders by `snapshot_date DESC` without filtering by `snapshot_type = 'Base'`. Since Base, Best, and Worst snapshots for the same month share the same date, the database will return a non-deterministic row (often Best or Worst). 
-- **Why it matters:** Because Best and Worst snapshots do not properly carry forward cash balances, the dashboard will frequently display a completely wrong previous cash balance (and thus a wrong current balance) to the user.
-- **Proposed fix:** Add `AND snapshot_type = 'Base'` to the `WHERE` clause in the `prev_balance` query.
-
-### [SEVERITY: Medium] — Refactor Financial Metrics Logic
-- **Source:** GitHub issue #4 (valid)
-- **Location:** `backend/services/financial.py`, `get_dashboard_metrics`
-- **What's wrong:** The dashboard metrics calculate raw `SUM()`s from `revenue` and `expenses` tables on every load, instead of just querying the pre-computed `financial_snapshots` table.
-- **Why it matters:** Slows down the dashboard load time unnecessarily and duplicates business logic.
-- **Proposed fix:** Fetch `monthly_revenue` and `monthly_expense` directly from the latest `Base` financial snapshot.
 
 ## Predictions
 
