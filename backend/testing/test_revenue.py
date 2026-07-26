@@ -42,12 +42,17 @@ def sample_revenue_create():
 # ── add_revenue ───────────────────────────────────────────────────────────────
 
 
+@pytest.mark.xfail(reason="[SEVERITY: High] — Add Revenue bug")
 def test_add_revenue_success(mock_db, sample_revenue_create):
     client_row = MagicMock()
     client_row.id = 10
     mock_db.execute.return_value.fetchone.return_value = client_row
     mock_db.refresh = MagicMock()
     revenue_service.add_revenue(sample_revenue_create, mock_db)
+    
+    query_text = mock_db.execute.call_args_list[0][0][0].text
+    assert "clients.email =" in query_text
+    
     mock_db.add.assert_called_once()
     mock_db.commit.assert_called_once()
 

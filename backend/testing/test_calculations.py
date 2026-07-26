@@ -101,6 +101,7 @@ def test_cash_balance_no_previous_balance():
     assert result == pytest.approx(2000.0)
 
 
-def test_cash_balance_negative_previous_treated_as_zero():
+@pytest.mark.xfail(reason="[SEVERITY: High] — cash_balance resets negative balances to monthly net")
+def test_cash_balance_negative_previous_carries_forward():
     result = calculations.cash_balance(-500.0, 3000.0, 1000.0)
-    assert result == pytest.approx(2000.0)
+    assert result == pytest.approx(1500.0)

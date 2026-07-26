@@ -101,7 +101,7 @@ def test_refresh_or_create_calls_all_three_upserts(mock_db):
 
 
 def test_upsert_snapshot_creates_new_when_not_exists(mock_db):
-    mock_db.query().filter().first.return_value = None
+    mock_db.execute.return_value.first.return_value = None
 
     with patch("services.snapshots.FinancialSnapshots") as MockSnapshot:
         snapshot_service._upsert_snapshot(
@@ -113,12 +113,13 @@ def test_upsert_snapshot_creates_new_when_not_exists(mock_db):
         )
 
         MockSnapshot.assert_called_once()
-        mock_db.add.assert_called_once()
+        mock_db.execute.assert_called()
         mock_db.commit.assert_called_once()
 
 
 def test_upsert_snapshot_updates_existing(mock_db, sample_snapshot):
-    mock_db.query().filter().first.return_value = sample_snapshot
+    # Base snapshot requires a prev_snapshot query, then the current snapshot query
+    mock_db.execute.return_value.first.side_effect = [sample_snapshot, sample_snapshot]
 
     snapshot_service._upsert_snapshot(
         db=mock_db,
@@ -128,11 +129,32 @@ def test_upsert_snapshot_updates_existing(mock_db, sample_snapshot):
         monthly_expenses=3000,
     )
 
-    assert sample_snapshot.monthly_revenue == 8000
-    assert sample_snapshot.monthly_expense == 3000
-    assert sample_snapshot.cash_balance == 5000
-    mock_db.add.assert_not_called()
-    mock_db.commit.assert_called_once()
+    # Note: _upsert_snapshot doesn't modify sample_snapshot directly, it uses UPDATE
+    # So we verify the UPDATE was executed.
+    assert mock_db.commit.call_count == 1
+    # Check that UPDATE statement was called with correct cash_balance (carry forward: 3000 + 8000 - 3000 = 8000)
+    update_calls = [c for c in mock_db.execute.call_args_list if "UPDATE financial_snapshots" in c[0][0].text]
+    assert len(update_calls) == 1
+    assert update_calls[0][0][1]["cash_balance"] == 8000
+
+
+@pytest.mark.xfail(reason="[SEVERITY: Critical] — Refactor Snapshot page logic")
+def test_upsert_snapshot_best_carries_forward(mock_db):
+    prev_snapshot = MagicMock()
+    prev_snapshot.cash_balance = 3000
+    mock_db.execute.return_value.first.side_effect = [prev_snapshot, None]
+
+    with patch("services.snapshots.FinancialSnapshots") as MockSnapshot:
+        snapshot_service._upsert_snapshot(
+            db=mock_db,
+            org_id=1,
+            snapshot_type="Best",
+            monthly_revenue=10000,
+            monthly_expenses=4000,
+        )
+        _, kwargs = MockSnapshot.call_args
+        assert kwargs["cash_balance"] == 9000  # 3000 + 10000 - 4000
+
 
 
 def test_upsert_snapshot_cash_balance_is_revenue_minus_expenses(mock_db):

@@ -74,6 +74,7 @@ def test_get_intelligence_metrics_no_revenue(mock_db):
 # ── get_dashboard_metrics ─────────────────────────────────────────────────────
 
 
+@pytest.mark.xfail(reason="[SEVERITY: High] — Dashboard cash balance fetches wrong snapshot type")
 def test_get_dashboard_metrics_success(mock_db):
     org_row = MagicMock()
     mock_db.execute.return_value.fetchone.return_value = org_row
@@ -84,6 +85,9 @@ def test_get_dashboard_metrics_success(mock_db):
         mock_calc.cash_runway.return_value = 6.5
 
         result = financial_service.get_dashboard_metrics(org_id=1, db=mock_db)
+
+    queries = [call[0][0].text for call in mock_db.execute.call_args_list if "financial_snapshots" in call[0][0].text]
+    assert any("snapshot_type = 'Base'" in q for q in queries)
 
     assert result["cash_balance"] == pytest.approx(13000.0)
     assert result["cash_runway"] == pytest.approx(6.5)
