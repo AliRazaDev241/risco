@@ -130,7 +130,7 @@ class ClientsResponse(BaseModel):
 
 class RevenueCreate(BaseModel):
     org_id: int
-    client_name: str
+    client_email: str
     revenue_type: Literal["One_Time", "Recurring"]
     date_expected: datetime
     date_received: datetime | None = None

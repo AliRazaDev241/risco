@@ -73,43 +73,21 @@ def get_dashboard_metrics(org_id: int, db: Session):
     if not org:
         raise LookupError(f"No organization found with id {org_id}")
 
-    # Revenue received this month
-    monthly_revenue = db.execute(
+    snapshot = db.execute(
         text("""
-        SELECT NVL(SUM(r.amount), 0)
-        FROM revenue r
-        JOIN clients c ON c.id = r.client_id
-        WHERE c.organization_id = :org_id
-        AND r.date_received IS NOT NULL
-        AND EXTRACT(MONTH FROM r.date_received) = :month
-        AND EXTRACT(YEAR FROM r.date_received) = :year
-    """),
-        {"org_id": org_id, "month": month, "year": year},
-    ).scalar()
-
-    # All expenses this month
-    monthly_expenses = db.execute(
-        text("""
-        SELECT NVL(SUM(amount), 0)
-        FROM expenses
-        WHERE organization_id = :org_id
-        AND EXTRACT(MONTH FROM "date") = :month
-        AND EXTRACT(YEAR FROM "date") = :year
-    """),
-        {"org_id": org_id, "month": month, "year": year},
-    ).scalar()
-
-    # Previous cash balance from the most recent snapshot
-    prev_balance = db.execute(
-        text("""
-        SELECT cash_balance
+        SELECT monthly_revenue, monthly_expense, cash_balance
         FROM financial_snapshots
         WHERE organization_id = :org_id
+        AND snapshot_type = 'Base'
         ORDER BY snapshot_date DESC
         FETCH FIRST 1 ROWS ONLY
     """),
         {"org_id": org_id},
-    ).scalar()
+    ).fetchone()
+
+    monthly_revenue = snapshot.monthly_revenue if snapshot else 0
+    monthly_expenses = snapshot.monthly_expense if snapshot else 0
+    current_balance = snapshot.cash_balance if snapshot else 0
 
     # Headcount
     headcount = (
@@ -122,10 +100,6 @@ def get_dashboard_metrics(org_id: int, db: Session):
             {"org_id": org_id},
         ).scalar()
         or 0
-    )
-
-    current_balance = calculations.cash_balance(
-        prev_balance, float(monthly_revenue), float(monthly_expenses)
     )
 
     return {

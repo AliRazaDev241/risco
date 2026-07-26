@@ -75,9 +75,5 @@ def cash_balance(
     Previous balance + revenue received this month - expenses this month.
     If no previous balance exists (first month), starts from 0.
     """
-    previous = (
-        cash_balance_previous
-        if (cash_balance_previous is not None and cash_balance_previous >= 0)
-        else 0.0
-    )
+    previous = cash_balance_previous if cash_balance_previous is not None else 0.0
     return previous + monthly_revenue - monthly_expenses

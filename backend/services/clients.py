@@ -16,6 +16,7 @@ def add_client(client: schema.ClientsCreate, db: Session):
             name=client.name,
             email=client.email,
             contact_number=client.contact_number,
+            reliability_score=100,
         )
         db.add(new_client)
         db.commit()

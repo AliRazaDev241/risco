@@ -13,13 +13,13 @@ def add_revenue(revenue: schema.RevenueCreate, db: Session):
     client_row = db.execute(
         text("""
         SELECT clients.id FROM clients 
-        WHERE clients.name = :name 
+        WHERE clients.email = :email 
         AND clients.organization_id = :org_id
     """),
-        {"name": revenue.client_name, "org_id": revenue.org_id},
+        {"email": revenue.client_email, "org_id": revenue.org_id},
     ).fetchone()
     if not client_row:
-        raise LookupError(f"No client found with name {revenue.client_name}")
+        raise LookupError(f"No client found with email {revenue.client_email}")
 
     try:
         new_revenue = Revenue(
@@ -32,7 +32,7 @@ def add_revenue(revenue: schema.RevenueCreate, db: Session):
         db.add(new_revenue)
         db.commit()
         db.refresh(new_revenue)
-        logger.info("Revenue added for client %s", revenue.client_name)
+        logger.info("Revenue added for client %s", revenue.client_email)
         return new_revenue
     except Exception:
         db.rollback()
