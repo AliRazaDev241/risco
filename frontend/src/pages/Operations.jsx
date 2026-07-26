@@ -22,7 +22,7 @@ export default function Operations() {
 
   // ── Revenue ──
   const [revenueForm, setRevenueForm] = useState({
-    client_name: "", revenue_type: "One_Time",
+    client_email: "", revenue_type: "One_Time",
     date_expected: "", date_received: "", amount: ""
   })
   const [revenueError, setRevenueError] = useState("")
@@ -116,7 +116,7 @@ export default function Operations() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           org_id: orgId,
-          client_name: revenueForm.client_name,
+          client_email: revenueForm.client_email,
           revenue_type: revenueForm.revenue_type,
           date_expected: revenueForm.date_expected ? revenueForm.date_expected + "T00:00:00" : null,
           date_received: revenueForm.date_received ? revenueForm.date_received + "T00:00:00" : null,
@@ -126,7 +126,7 @@ export default function Operations() {
       const data = await res.json()
       if (res.ok || res.status === 201) {
         setRevenueSuccess("Revenue added!")
-        setRevenueForm({ client_name: "", revenue_type: "One_Time", date_expected: "", date_received: "", amount: "" })
+        setRevenueForm({ client_email: "", revenue_type: "One_Time", date_expected: "", date_received: "", amount: "" })
       } else {
         const msg = Array.isArray(data.detail) ? (data.detail[0]?.msg || "Validation error") : (data.detail || "Failed to add revenue")
         setRevenueError(msg)
@@ -271,9 +271,9 @@ export default function Operations() {
         <form onSubmit={handleAddRevenue}>
           <div className="flex flex-wrap items-end md:grid-cols-3 gap-3">
             <div className="flex-1 min-w-[150px]">
-              <label htmlFor="revenue-client-name" className={labelClass}>Client Name</label>
-              <input id="revenue-client-name" type="text" placeholder="Zain Ahmed" value={revenueForm.client_name}
-                onChange={e => setRevenueForm({ ...revenueForm, client_name: e.target.value })}
+              <label htmlFor="revenue-client-email" className={labelClass}>Client Email</label>
+              <input id="revenue-client-email" type="email" placeholder="client@email.com" value={revenueForm.client_email}
+                onChange={e => setRevenueForm({ ...revenueForm, client_email: e.target.value })}
                 className={inputClass} />
             </div>
             <div className="flex-1 min-w-[150px]">
