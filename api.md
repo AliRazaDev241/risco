@@ -1,8 +1,33 @@
-# Login/Register Page
- 
-## POST /users/
+# Drift Log: API.md vs. Current Codebase
+
+Before presenting the corrected API documentation, here is a record of every place the previous `api.md` doc was wrong, missing, or stale compared to the actual codebase:
+
+1. **Endpoint Path Mismatch for Graphs**: 
+   - `api.md` listed `POST /financial/graph`. 
+   - **Code**: The endpoint is actually implemented as `POST /snapshots/graph` (defined in `routers/snapshots.py` which mounts with the `/snapshots` prefix).
+2. **Role Naming / Casing Inconsistency**:
+   - `api.md` stated `role_name` must be one of `"coowner", "stakeholder"`. 
+   - **Code**: There's internal drift here. `schema.RoleCreate` expects `"Owner", "Co_Owner", "Stakeholder"`. However, `services/organization_members.py` strictly checks against `ASSIGNABLE_ROLES = {"coowner", "stakeholder"}`. The old API doc accurately reflected the service logic, but contradicted the Pydantic schema validation. We document the service requirement here.
+3. **Empty Sections**:
+   - `api.md` contained empty headers for `# Clients Page`, `# Risk Alerts`, and `# Role Based Access`. 
+   - **Code**: This is technically accurate because there are no GET endpoints for clients, and no router files/endpoints for risk alerts or RBAC management. The code only contains schemas for risk alerts, but no actual API endpoints exist.
+4. **Error Message Wording**:
+   - `api.md` for `POST /organizations/join` listed a 403 error description as "User is not a member of the given organization".
+   - **Code**: The actual error returned is `"You have not been added to this organization, contact your admin"`.
+
+---
+
+# Corrected API Documentation
+
+> **Note on Authentication:**
+> JWT/RBAC is planned but **NOT YET IMPLEMENTED**. None of the endpoints currently validate a Bearer token or enforce RBAC permissions from a token context. Authorization relies entirely on explicit parameters (like `creator_id` or `added_by` in the request body).
+
+## Users
+
+### POST /users/
 - **Usage:** Register a new user
-### Request Body
+- **Auth:** Not enforced (JWT/RBAC planned but NOT YET IMPLEMENTED)
+- **Request Body:**
 ```json
 {
   "email": "string",
@@ -11,8 +36,7 @@
   "last_name": "string"
 }
 ```
- 
-### Response Body
+- **Response Body:**
 ```json
 {
   "id": 0,
@@ -22,25 +46,20 @@
   "created_at": "2026-04-30T16:21:27.062Z"
 }
 ```
- 
-### Errors
-| Code | Description |
-|------|-------------|
-| 400  | Email already registered |
- 
----
- 
-## POST /users/login
+- **Errors:**
+  - `400`: Email already registered
+
+### POST /users/login
 - **Usage:** Log in a registered user
-### Request Body
+- **Auth:** Not enforced (JWT/RBAC planned but NOT YET IMPLEMENTED)
+- **Request Body:**
 ```json
 {
   "email": "string",
   "password": "string"
 }
 ```
- 
-### Response Body
+- **Response Body:**
 ```json
 {
   "id": 0,
@@ -50,103 +69,80 @@
   "created_at": "2026-04-30T16:32:50.647Z"
 }
 ```
- 
-### Errors
-| Code | Description |
-|------|-------------|
-| 401  | Invalid email or password |
- 
+- **Errors:**
+  - `401`: Invalid email or password
+
 ---
- 
-# Organizations Page
- 
-## GET /organizations/user/{user_id}
+
+## Organizations
+
+### GET /organizations/user/{user_id}
 - **Usage:** Check if a user has an organization
-### Parameters
-| Name    | In   | Type    | Required |
-|---------|------|---------|----------|
-| user_id | path | integer | Yes      |
- 
-### Response Body
+- **Auth:** Not enforced (JWT/RBAC planned but NOT YET IMPLEMENTED)
+- **Parameters:**
+  - `user_id` (path, integer)
+- **Response Body:**
 ```json
 {
   "id": 0,
   "org_name": "string"
 }
 ```
- 
-### Errors
-| Code | Description |
-|------|-------------|
-| 404  | Organization not found |
- 
----
- 
-## POST /organizations/
+- **Errors:**
+  - `404`: No organization found
+
+### POST /organizations/
 - **Usage:** Create a new organization
-### Parameters
-| Name       | In    | Type    | Required |
-|------------|-------|---------|----------|
-| creator_id | query | integer | Yes      |
- 
-### Request Body
+- **Auth:** Not enforced (JWT/RBAC planned but NOT YET IMPLEMENTED)
+- **Parameters:**
+  - `creator_id` (query, integer)
+- **Request Body:**
 ```json
 {
   "org_name": "string"
 }
 ```
- 
-### Response Body
+- **Response Body:**
 ```json
 {
   "id": 0,
   "org_name": "string"
 }
 ```
- 
-### Errors
-| Code | Description |
-|------|-------------|
-| 400  | Organization name already taken |
- 
----
- 
-## POST /organizations/join
+- **Errors:**
+  - `400`: Organization name already taken
+
+### POST /organizations/join
 - **Usage:** Join an existing organization
-### Request Body
+- **Auth:** Not enforced (JWT/RBAC planned but NOT YET IMPLEMENTED)
+- **Request Body:**
 ```json
 {
   "user_id": 0,
   "org_name": "string"
 }
 ```
- 
-### Response Body
+- **Response Body:**
 ```json
 {
   "id": 0,
   "org_name": "string"
 }
 ```
- 
-### Errors
-| Code | Description |
-|------|-------------|
-| 404  | Organization does not exist |
-| 403  | User is not a member of the given organization |
- 
+- **Errors:**
+  - `404`: Organization does not exist
+  - `403`: You have not been added to this organization, contact your admin
+
 ---
- 
-# Operations Page
- 
-## GET /organizations/{org_id}/members/
+
+## Organization Members
+
+### GET /organizations/{org_id}/members/
 - **Usage:** List all members of an organization
-### Parameters
-| Name   | In   | Type    | Required |
-|--------|------|---------|----------|
-| org_id | path | integer | Yes      |
- 
-### Response Body
+- **Auth:** Not enforced (JWT/RBAC planned but NOT YET IMPLEMENTED)
+- **Parameters:**
+  - `org_id` (path, integer)
+- **Response Body:**
 ```json
 [
   {
@@ -156,23 +152,16 @@
   }
 ]
 ```
- 
-### Errors
-| Code | Description |
-|------|-------------|
-| 500  | Failed to fetch members |
- 
----
- 
-## POST /organizations/{org_id}/members/
+- **Errors:**
+  - `500`: Failed to fetch members
+
+### POST /organizations/{org_id}/members/
 - **Usage:** Add a member to an organization
-- **Note:** role_name must be one of: "coowner", "stakeholder" — "owner" cannot be assigned through this endpoint
-### Parameters
-| Name   | In   | Type    | Required |
-|--------|------|---------|----------|
-| org_id | path | integer | Yes      |
- 
-### Request Body
+- **Auth:** Not enforced (JWT/RBAC planned but NOT YET IMPLEMENTED)
+- **Note:** `role_name` must be one of `"coowner"`, `"stakeholder"` based on service-level assignment limits. `"owner"` cannot be assigned here.
+- **Parameters:**
+  - `org_id` (path, integer)
+- **Request Body:**
 ```json
 {
   "email": "string",
@@ -180,197 +169,109 @@
   "added_by": 0
 }
 ```
- 
-### Errors
-| Code | Description |
-|------|-------------|
-| 201  | Member added successfully |
-| 404  | User not found |
-| 409  | Member is already part of the organization |
-| 500  | Failed to add member |
- 
----
- 
-## DELETE /organizations/{org_id}/members/{member_id}
+- **Response (201 Created):**
+```json
+{
+  "detail": "user@example.com added successfully as coowner"
+}
+```
+- **Errors:**
+  - `404`: User not found or No role found
+  - `409`: Member is already part of the organization (or invalid assignable role)
+  - `500`: Failed to add member
+
+### DELETE /organizations/{org_id}/members/{member_id}
 - **Usage:** Remove a member from an organization
-### Parameters
-| Name      | In   | Type    | Required |
-|-----------|------|---------|----------|
-| org_id    | path | integer | Yes      |
-| member_id | path | integer | Yes      |
- 
-### Errors
-| Code | Description |
-|------|-------------|
-| 200  | Member removed successfully |
-| 404  | Member is not part of the organization |
-| 500  | Failed to remove member |
- 
+- **Auth:** Not enforced (JWT/RBAC planned but NOT YET IMPLEMENTED)
+- **Parameters:**
+  - `org_id` (path, integer)
+  - `member_id` (path, integer)
+- **Errors:**
+  - `200`: Member removed successfully
+  - `404`: Member is not part of the organization
+  - `500`: Failed to remove member
+
 ---
- 
-## POST /clients/
+
+## Clients
+
+### POST /clients/
 - **Usage:** Add a new client to an organization
-### Request Body
+- **Auth:** Not enforced (JWT/RBAC planned but NOT YET IMPLEMENTED)
+- **Request Body:**
 ```json
 {
   "name": "string",
   "email": "string",
-  "contact_number": "string or null",
+  "contact_number": "string",
   "organization_id": 0
 }
 ```
- 
-### Response Body
+- **Response Body (201 Created):**
 ```json
 {
   "id": 0,
   "organization_id": 0,
   "name": "string",
   "email": "string",
-  "contact_number": "string or null"
+  "contact_number": "string"
 }
 ```
- 
-### Notes
-- `contact_number` is optional — send null if not provided
-- `reliability_score` is managed internally and cannot be set on creation
-### Errors
-| Code | Description |
-|------|-------------|
-| 201  | Client added successfully |
-| 409  | Client with this email already exists |
-| 409  | Client with this contact number already exists |
-| 404  | Organization not found |
-| 500  | Failed to add client |
- 
+- **Notes:**
+  - `contact_number` is optional (can be null).
+  - `reliability_score` is managed internally and cannot be set on creation.
+- **Errors:**
+  - `409`: Client with this email already exists OR Client with this contact number already exists
+  - `404`: Organization not found
+  - `500`: Failed to add client
+
 ---
- 
-## POST /revenue/
+
+## Revenue
+
+### POST /revenue/
 - **Usage:** Add a revenue entry
-### Request Body
+- **Auth:** Not enforced (JWT/RBAC planned but NOT YET IMPLEMENTED)
+- **Request Body:**
 ```json
 {
   "org_id": 0,
   "client_name": "string",
   "revenue_type": "One_Time",
   "date_expected": "2026-05-01T07:31:13.226Z",
-  "date_received": "2026-05-01T07:31:13.226Z or null",
+  "date_received": "2026-05-01T07:31:13.226Z",
   "amount": 1
 }
 ```
- 
-### Response Body
+- **Response Body (201 Created):**
 ```json
 {
   "id": 0,
   "client_id": 0,
   "revenue_type": "string",
   "date_expected": "2026-04-30T17:33:10.597Z",
-  "date_received": "2026-04-30T17:33:10.597Z or null",
+  "date_received": "2026-04-30T17:33:10.597Z",
   "amount": 0
 }
 ```
- 
-### Notes
-- `revenue_type` must be one of: "One_Time", "Recurring"
-- `date_received` is optional — send null if not yet received
-- `date_received` cannot be a future date
-- `amount` must be greater than 0
-- `client_name` must match an existing client in the organization
-### Errors
-| Code | Description |
-|------|-------------|
-| 201  | Revenue added successfully |
-| 404  | Client not found |
-| 422  | Amount must be greater than 0 |
-| 422  | date_received cannot be in the future |
-| 500  | Failed to add revenue |
- 
----
- 
-## POST /expenses/
-- **Usage:** Add an expense entry
-### Request Body
-```json
-{
-  "organization_id": 0,
-  "urgency": "Critical",
-  "expense_type": "One_Time",
-  "date": "2026-04-30T17:33:10.582Z",
-  "amount": 1
-}
-```
- 
-### Response Body
-```json
-{
-  "id": 0,
-  "organization_id": 0,
-  "urgency": "string",
-  "expense_type": "string",
-  "date": "2026-04-30T17:33:10.606Z",
-  "amount": 0
-}
-```
- 
-### Notes
-- `urgency` must be one of: "Critical", "Non-Critical"
-- `expense_type` must be one of: "One_Time", "Recurring"
-- `amount` must be greater than 0
-### Errors
-| Code | Description |
-|------|-------------|
-| 201  | Expense added successfully |
-| 404  | Organization not found |
-| 422  | Amount must be greater than 0 |
-| 500  | Failed to add expense |
- 
----
- 
-# Financial Intelligence Page
- 
-## GET /financial/intelligence
-- **Usage:** Fetch key financial metrics for the Financial Intelligence Page
-### Parameters
-| Name   | In    | Type    | Required |
-|--------|-------|---------|----------|
-| org_id | query | integer | Yes      |
- 
-### Response Body
-```json
-{
-  "revenue_reliability_score": 0,
-  "revenue_concentration_risk": 0.5041322314049586,
-  "reliable_revenue": 0,
-  "total_revenue_expected": 220,
-  "actual_revenue": 220
-}
-```
- 
-### Notes
-- `revenue_reliability_score`: weighted average reliability (0-100), based on client reliability scores
-- `revenue_concentration_risk`: HHI index (0.0-1.0), higher = more concentrated = higher risk
-- `reliable_revenue`: revenue weighted by client reliability scores
-- `total_revenue_expected`: sum of all expected revenue this month
-- `actual_revenue`: sum of revenue with date_received set this month
-### Errors
-| Code | Description |
-|------|-------------|
-| 404  | Organization not found |
-| 500  | Failed to fetch Financial Metrics |
- 
----
- 
-## GET /revenue/
-- **Usage:** List revenue entries (5 per page)
-### Parameters
-| Name         | In    | Type    | Required |
-|--------------|-------|---------|----------|
-| org_id       | query | integer | Yes      |
-| revenue_type | query | string  | Yes      |
-| page_no      | query | integer | Yes      |
- 
-### Response Body
+- **Notes:**
+  - `revenue_type` must be `"One_Time"` or `"Recurring"`.
+  - `date_received` is optional (null if not yet received).
+  - `date_received` cannot be a future date (returns 422 if so).
+  - `amount` must be > 0.
+- **Errors:**
+  - `404`: Client not found
+  - `422`: Amount must be greater than 0 / date_received cannot be in the future
+  - `500`: Failed to add revenue
+
+### GET /revenue/
+- **Usage:** List revenue entries (paginated, 5 per page)
+- **Auth:** Not enforced (JWT/RBAC planned but NOT YET IMPLEMENTED)
+- **Parameters:**
+  - `org_id` (query, integer)
+  - `revenue_type` (query, string)
+  - `page_no` (query, integer)
+- **Response Body:**
 ```json
 {
   "items": [
@@ -379,7 +280,7 @@
       "client_name": "string",
       "client_email": "string",
       "date_expected": "2026-04-30T16:41:47.928Z",
-      "date_received": "2026-04-30T16:41:47.928Z or null",
+      "date_received": "2026-04-30T16:41:47.928Z",
       "amount": 0
     }
   ],
@@ -387,30 +288,22 @@
   "current_page": 0
 }
 ```
- 
-### Errors
-| Code | Description |
-|------|-------------|
-| 404  | Organization not found |
-| 500  | Failed to fetch revenue |
- 
----
- 
-## PATCH /revenue/{revenue_id}
+- **Errors:**
+  - `404`: Organization not found
+  - `500`: Failed to fetch revenue
+
+### PATCH /revenue/{revenue_id}
 - **Usage:** Update the date received for a revenue entry
-### Parameters
-| Name       | In   | Type    | Required |
-|------------|------|---------|----------|
-| revenue_id | path | integer | Yes      |
- 
-### Request Body
+- **Auth:** Not enforced (JWT/RBAC planned but NOT YET IMPLEMENTED)
+- **Parameters:**
+  - `revenue_id` (path, integer)
+- **Request Body:**
 ```json
 {
   "date_received": "2025-04-30T14:25:41.271Z"
 }
 ```
- 
-### Response Body
+- **Response Body:**
 ```json
 {
   "id": 22,
@@ -421,25 +314,55 @@
   "amount": 10000
 }
 ```
- 
-### Errors
-| Code | Description |
-|------|-------------|
-| 404  | Revenue not found |
-| 500  | Failed to update revenue |
- 
+- **Errors:**
+  - `404`: Revenue not found
+  - `500`: Failed to update revenue
+
 ---
- 
-## GET /expenses/
-- **Usage:** List expense entries (5 per page)
-### Parameters
-| Name         | In    | Type    | Required |
-|--------------|-------|---------|----------|
-| org_id       | query | integer | Yes      |
-| expense_type | query | string  | Yes      |
-| page_no      | query | integer | Yes      |
- 
-### Response Body
+
+## Expenses
+
+### POST /expenses/
+- **Usage:** Add an expense entry
+- **Auth:** Not enforced (JWT/RBAC planned but NOT YET IMPLEMENTED)
+- **Request Body:**
+```json
+{
+  "organization_id": 0,
+  "urgency": "Critical",
+  "expense_type": "One_Time",
+  "date": "2026-04-30T17:33:10.582Z",
+  "amount": 1
+}
+```
+- **Response Body (201 Created):**
+```json
+{
+  "id": 0,
+  "organization_id": 0,
+  "urgency": "string",
+  "expense_type": "string",
+  "date": "2026-04-30T17:33:10.606Z",
+  "amount": 0
+}
+```
+- **Notes:**
+  - `urgency` must be `"Critical"` or `"Non-Critical"`.
+  - `expense_type` must be `"One_Time"` or `"Recurring"`.
+  - `amount` must be > 0.
+- **Errors:**
+  - `404`: Organization not found
+  - `422`: Amount must be greater than 0
+  - `500`: Failed to add expense
+
+### GET /expenses/
+- **Usage:** List expense entries (paginated, 5 per page)
+- **Auth:** Not enforced (JWT/RBAC planned but NOT YET IMPLEMENTED)
+- **Parameters:**
+  - `org_id` (query, integer)
+  - `expense_type` (query, string)
+  - `page_no` (query, integer)
+- **Response Body:**
 ```json
 {
   "items": [
@@ -454,25 +377,45 @@
   "current_page": 0
 }
 ```
- 
-### Errors
-| Code | Description |
-|------|-------------|
-| 404  | Organization not found |
-| 500  | Failed to fetch expenses |
- 
+- **Errors:**
+  - `404`: Organization not found
+  - `500`: Failed to fetch expenses
+
 ---
- 
-# Dashboard Page
- 
-## GET /financial/dashboard
+
+## Financial Intelligence
+
+### GET /financial/intelligence
+- **Usage:** Fetch key financial metrics for the Financial Intelligence Page
+- **Auth:** Not enforced (JWT/RBAC planned but NOT YET IMPLEMENTED)
+- **Parameters:**
+  - `org_id` (query, integer)
+- **Response Body:**
+```json
+{
+  "revenue_reliability_score": 0,
+  "revenue_concentration_risk": 0.5041322314049586,
+  "reliable_revenue": 0,
+  "total_revenue_expected": 220,
+  "actual_revenue": 220
+}
+```
+- **Notes:**
+  - `revenue_reliability_score`: weighted average reliability (0-100), based on client reliability scores
+  - `revenue_concentration_risk`: HHI index (0.0-1.0), higher = more concentrated = higher risk
+  - `reliable_revenue`: revenue weighted by client reliability scores
+  - `total_revenue_expected`: sum of all expected revenue this month
+  - `actual_revenue`: sum of revenue with `date_received` set this month
+- **Errors:**
+  - `404`: Organization not found
+  - `500`: Failed to fetch intelligence metrics
+
+### GET /financial/dashboard
 - **Usage:** Fetch key financial metrics for the Dashboard Overview
-### Parameters
-| Name   | In    | Type    | Required |
-|--------|-------|---------|----------|
-| org_id | query | integer | Yes      |
- 
-### Response Body
+- **Auth:** Not enforced (JWT/RBAC planned but NOT YET IMPLEMENTED)
+- **Parameters:**
+  - `org_id` (query, integer)
+- **Response Body:**
 ```json
 {
   "cash_runway": 0.0,
@@ -482,24 +425,24 @@
   "headcount": 0
 }
 ```
- 
-### Notes
-- `cash_runway`: months of cash remaining at current burn rate. null if expenses are zero
-- `burn_rate`: total expenses this month
-- `cash_balance`: previous balance + monthly revenue - monthly expenses
-- `monthly_revenue`: actual received revenue this month
-- `headcount`: number of members in the organization
-### Errors
-| Code | Description |
-|------|-------------|
-| 404  | Organization not found |
-| 500  | Failed to fetch Dashboard Metrics |
- 
+- **Notes:**
+  - `cash_runway`: months of cash remaining at current burn rate. null if expenses are zero.
+  - `burn_rate`: total expenses this month.
+  - `cash_balance`: previous balance + monthly revenue - monthly expenses.
+  - `monthly_revenue`: actual received revenue this month.
+  - `headcount`: number of members in the organization.
+- **Errors:**
+  - `404`: Organization not found
+  - `500`: Failed to fetch Dashboard Metrics
 
-## POST /financial/graph
+---
+
+## Snapshots (Graph)
+
+### POST /snapshots/graph
 - **Usage:** Fetches time-series snapshot data for rendering a graph
-
-### Request Body
+- **Auth:** Not enforced (JWT/RBAC planned but NOT YET IMPLEMENTED)
+- **Request Body:**
 ```json
 {
   "org_id": 0,
@@ -509,17 +452,10 @@
   "end_date": "2026-05-03T10:55:55.060Z"
 }
 ```
-
-### Request Fields
-| Field         | Type    | Required | Allowed Values                              |
-|---------------|---------|----------|---------------------------------------------|
-| org_id        | integer | Yes      | —                                           |
-| snapshot_type | string  | Yes      | `Base`, `Best`, `Worst`                     |
-| metric_type   | string  | Yes      | `cash_balance`, `monthly_revenue`, `monthly_expense` |
-| start_date    | datetime| Yes      | ISO 8601                                    |
-| end_date      | datetime| Yes      | ISO 8601                                    |
-
-### Response Body
+- **Request Fields:**
+  - `snapshot_type`: `Base`, `Best`, `Worst`
+  - `metric_type`: `cash_balance`, `monthly_revenue`, `monthly_expense`
+- **Response Body:**
 ```json
 {
   "date_range_start": "2026-01-01T00:00:00.000Z",
@@ -532,25 +468,9 @@
   ]
 }
 ```
-### Notes
-- `date_range_start`: earliest snapshot date in the database for this org and snapshot type
-- `date_range_end`: latest snapshot date in the database for this org and snapshot type
-- `data`: filtered results within the requested `start_date` and `end_date`
-
-### Errors
-| Code | Description              |
-|------|--------------------------|
-| 404  | Organization not found   |
-| 500  | Failed to fetch graph data |
-
----
- 
-# Clients Page
- 
----
- 
-# Risk Alerts
- 
----
- 
-# Role Based Access
+- **Notes:**
+  - `date_range_start` / `date_range_end`: bounds for snapshot data available for this org and snapshot type.
+  - `data`: filtered results within the requested date range.
+- **Errors:**
+  - `404`: Organization not found
+  - `500`: Failed to fetch Graph Data
